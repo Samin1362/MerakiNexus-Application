@@ -1,0 +1,220 @@
+{
+  "artworks": [
+    {
+      "id": 1,
+      "title": "Echoes of Dawn",
+      "artist": "Aarav Sen",
+      "image_url": "https://picsum.photos/seed/art1/600/400",
+      "classification": "Impressionism",
+      "classification_percentage": 92.4,
+      "scores": {
+        "aesthetic_score": 0.87,
+        "sentiment_score": 0.72,
+        "memorability_score": 0.91,
+        "art_evaluation_score": 0.89
+      },
+      "art_value_usd": 12500,
+      "created_year": 2021,
+      "medium": "Oil on Canvas",
+      "tags": ["light", "nature", "sunrise"]
+    },
+    {
+      "id": 2,
+      "title": "Fractured Reality",
+      "artist": "Maya Kapoor",
+      "image_url": "https://picsum.photos/seed/art2/600/400",
+      "classification": "Cubism",
+      "classification_percentage": 88.1,
+      "scores": {
+        "aesthetic_score": 0.76,
+        "sentiment_score": 0.65,
+        "memorability_score": 0.88,
+        "art_evaluation_score": 0.82
+      },
+      "art_value_usd": 9800,
+      "created_year": 2020,
+      "medium": "Acrylic",
+      "tags": ["abstract", "geometry", "modern"]
+    },
+    {
+      "id": 3,
+      "title": "Whispers in Blue",
+      "artist": "Elena Rossi",
+      "image_url": "https://picsum.photos/seed/art3/600/400",
+      "classification": "Expressionism",
+      "classification_percentage": 85.6,
+      "scores": {
+        "aesthetic_score": 0.81,
+        "sentiment_score": 0.79,
+        "memorability_score": 0.84,
+        "art_evaluation_score": 0.86
+      },
+      "art_value_usd": 13400,
+      "created_year": 2019,
+      "medium": "Watercolor",
+      "tags": ["melancholy", "emotion", "blue tones"]
+    },
+    {
+      "id": 4,
+      "title": "Digital Bloom",
+      "artist": "Kenji Tanaka",
+      "image_url": "https://picsum.photos/seed/art4/600/400",
+      "classification": "Digital Art",
+      "classification_percentage": 94.7,
+      "scores": {
+        "aesthetic_score": 0.92,
+        "sentiment_score": 0.83,
+        "memorability_score": 0.89,
+        "art_evaluation_score": 0.91
+      },
+      "art_value_usd": 15700,
+      "created_year": 2023,
+      "medium": "Digital",
+      "tags": ["floral", "AI art", "modern"]
+    },
+    {
+      "id": 5,
+      "title": "Timeless Echo",
+      "artist": "Liam O’Connor",
+      "image_url": "https://picsum.photos/seed/art5/600/400",
+      "classification": "Surrealism",
+      "classification_percentage": 90.2,
+      "scores": {
+        "aesthetic_score": 0.89,
+        "sentiment_score": 0.74,
+        "memorability_score": 0.95,
+        "art_evaluation_score": 0.92
+      },
+      "art_value_usd": 16200,
+      "created_year": 2022,
+      "medium": "Mixed Media",
+      "tags": ["dream", "fantasy", "time"]
+    },
+    {
+      "id": 6,
+      "title": "Silent Forest",
+      "artist": "Sophia Lindberg",
+      "image_url": "https://picsum.photos/seed/art6/600/400",
+      "classification": "Realism",
+      "classification_percentage": 82.9,
+      "scores": {
+        "aesthetic_score": 0.77,
+        "sentiment_score": 0.68,
+        "memorability_score": 0.79,
+        "art_evaluation_score": 0.80
+      },
+      "art_value_usd": 8800,
+      "created_year": 2018,
+      "medium": "Charcoal",
+      "tags": ["forest", "monochrome", "silence"]
+    },
+    {
+      "id": 7,
+      "title": "Cosmic Drift",
+      "artist": "Ibrahim Khan",
+      "image_url": "https://picsum.photos/seed/art7/600/400",
+      "classification": "Abstract",
+      "classification_percentage": 89.3,
+      "scores": {
+        "aesthetic_score": 0.85,
+        "sentiment_score": 0.71,
+        "memorability_score": 0.92,
+        "art_evaluation_score": 0.87
+      },
+      "art_value_usd": 14500,
+      "created_year": 2021,
+      "medium": "Oil on Canvas",
+      "tags": ["space", "cosmos", "flow"]
+    },
+    {
+      "id": 8,
+      "title": "Urban Mirage",
+      "artist": "Noah Carter",
+      "image_url": "https://picsum.photos/seed/art8/600/400",
+      "classification": "Street Art",
+      "classification_percentage": 84.4,
+      "scores": {
+        "aesthetic_score": 0.73,
+        "sentiment_score": 0.81,
+        "memorability_score": 0.78,
+        "art_evaluation_score": 0.79
+      },
+      "art_value_usd": 9200,
+      "created_year": 2020,
+      "medium": "Spray Paint",
+      "tags": ["city", "graffiti", "illusion"]
+    },
+    {
+      "id": 9,
+      "title": "Golden Horizon",
+      "artist": "Aisha Rahman",
+      "image_url": "https://picsum.photos/seed/art9/600/400",
+      "classification": "Landscape",
+      "classification_percentage": 91.8,
+      "scores": {
+        "aesthetic_score": 0.91,
+        "sentiment_score": 0.82,
+        "memorability_score": 0.86,
+        "art_evaluation_score": 0.90
+      },
+      "art_value_usd": 13800,
+      "created_year": 2021,
+      "medium": "Oil",
+      "tags": ["sunset", "nature", "warm"]
+    },
+    {
+      "id": 10,
+      "title": "Fragments of Memory",
+      "artist": "Diego Alvarez",
+      "image_url": "https://picsum.photos/seed/art10/600/400",
+      "classification": "Contemporary",
+      "classification_percentage": 86.7,
+      "scores": {
+        "aesthetic_score": 0.79,
+        "sentiment_score": 0.67,
+        "memorability_score": 0.88,
+        "art_evaluation_score": 0.84
+      },
+      "art_value_usd": 10200,
+      "created_year": 2022,
+      "medium": "Mixed Media",
+      "tags": ["memory", "fragments", "modern"]
+    },
+    {
+      "id": 11,
+      "title": "Ocean’s Whisper",
+      "artist": "Haruto Yamamoto",
+      "image_url": "https://picsum.photos/seed/art11/600/400",
+      "classification": "Minimalism",
+      "classification_percentage": 80.5,
+      "scores": {
+        "aesthetic_score": 0.74,
+        "sentiment_score": 0.63,
+        "memorability_score": 0.81,
+        "art_evaluation_score": 0.76
+      },
+      "art_value_usd": 7700,
+      "created_year": 2019,
+      "medium": "Ink on Paper",
+      "tags": ["ocean", "silence", "minimal"]
+    },
+    {
+      "id": 12,
+      "title": "Neon Dreams",
+      "artist": "Chloe Dubois",
+      "image_url": "https://picsum.photos/seed/art12/600/400",
+      "classification": "Futurism",
+      "classification_percentage": 95.2,
+      "scores": {
+        "aesthetic_score": 0.93,
+        "sentiment_score": 0.88,
+        "memorability_score": 0.94,
+        "art_evaluation_score": 0.95
+      },
+      "art_value_usd": 17200,
+      "created_year": 2023,
+      "medium": "Digital",
+      "tags": ["neon", "cityscape", "future"]
+    }
+  ]
+}

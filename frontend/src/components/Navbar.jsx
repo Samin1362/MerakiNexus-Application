@@ -97,6 +97,7 @@ function Navbar() {
     { label: "Art Gallery", to: "/gallery" },
     { label: "Upload Artwork", to: "/upload" },
     { label: "About", to: "/about" },
+    { label: "Chatbot", to: "/chatbot"}
   ];
 
   return (

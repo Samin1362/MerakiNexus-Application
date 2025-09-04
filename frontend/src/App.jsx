@@ -7,6 +7,7 @@ import GalleryPage from "./pages/GalleryPage";
 import UploadPage from "./pages/UploadPage";
 import AboutPage from "./pages/AboutPage";
 import NotFound from "./pages/NotFound";
+import ChatbotApp from "./pages/ChatbotApp";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/gallery" element={<GalleryPage />} />
         <Route path="/upload" element={<UploadPage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/chatbot" element={<ChatbotApp />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

@@ -97,7 +97,8 @@ function Navbar() {
     { label: "Art Gallery", to: "/gallery" },
     { label: "Upload Artwork", to: "/upload" },
     { label: "About", to: "/about" },
-    { label: "Chatbot", to: "/chatbot"}
+    { label: "Chatbot", to: "/chatbot"},
+    { label: "DashBoard", to: "/dashboardHome"},
   ];
 
   return (
@@ -131,7 +132,7 @@ function Navbar() {
             ))}
 
             <Link
-              to="#"
+              to="/login"
               className="rounded-full bg-gray-900 text-white text-sm px-4 py-2 shadow-sm hover:shadow-md transition-shadow"
             >
               Login
@@ -182,7 +183,7 @@ function Navbar() {
             </Link>
           ))}
           <Link
-            to="#"
+            to="/login"
             className="mt-2 block rounded-md bg-gray-900 text-white text-center px-3 py-2 text-base font-medium"
           >
             Login

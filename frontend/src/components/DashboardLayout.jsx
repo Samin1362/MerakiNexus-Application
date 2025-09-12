@@ -1,20 +1,21 @@
 import { useState } from "react";
-import { 
-  LayoutDashboard, 
-  Users, 
-  Image, 
-  Coins, 
-  Clock, 
+import {
+  LayoutDashboard,
+  Users,
+  Image,
+  Coins,
+  Clock,
   Settings,
   Menu,
   X,
   LogOut,
   Bell,
-  Search
+  Search,
 } from "lucide-react";
 
 // ✅ Import your DashboardHome component
 import DashboardHome from "../pages/DashboardHome";
+import DashboardUsers from "../pages/DashboardUsers";
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -44,7 +45,7 @@ const DashboardLayout = () => {
   const NavItem = ({ item }) => {
     const Icon = item.icon;
     const isActive = isActiveRoute(item.path);
-    
+
     return (
       <button
         onClick={() => handleNavClick(item.path)}
@@ -54,9 +55,11 @@ const DashboardLayout = () => {
             : "text-gray-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-gray-900"
         }`}
       >
-        <Icon 
-          size={20} 
-          className={`${isActive ? "text-white" : "text-gray-500 group-hover:text-blue-600"} transition-colors duration-300`} 
+        <Icon
+          size={20}
+          className={`${
+            isActive ? "text-white" : "text-gray-500 group-hover:text-blue-600"
+          } transition-colors duration-300`}
         />
         <span className="font-medium">{item.label}</span>
       </button>
@@ -67,17 +70,21 @@ const DashboardLayout = () => {
     <div className="flex min-h-screen bg-gradient-to-br from-slate-50 md:mt-[65px] to-blue-50">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <aside className={`
+      <aside
+        className={`
         fixed lg:relative inset-y-0 left-0 z-50 w-72 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out
-        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-      `}>
+        ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }
+      `}
+      >
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
           <div className="p-6 border-b border-gray-100">
@@ -140,7 +147,7 @@ const DashboardLayout = () => {
               >
                 <Menu size={20} className="text-gray-600" />
               </button>
-              
+
               {/* Search Bar */}
               <div className="hidden md:flex items-center space-x-3 bg-gray-50 rounded-xl px-4 py-2 min-w-80">
                 <Search size={18} className="text-gray-400" />
@@ -175,20 +182,15 @@ const DashboardLayout = () => {
             {/* ✅ Overview now renders DashboardHome */}
             {activeRoute === "/dashboard" && <DashboardHome />}
 
-            {activeRoute === "/dashboard/users" && (
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                  User Management
-                </h1>
-                <p className="text-gray-600">Manage all platform users here.</p>
-              </div>
-            )}
+            {activeRoute === "/dashboard/users" && <DashboardUsers />}
             {activeRoute === "/dashboard/artworks" && (
               <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
                   Artwork Gallery
                 </h1>
-                <p className="text-gray-600">Browse and manage all artworks on the platform.</p>
+                <p className="text-gray-600">
+                  Browse and manage all artworks on the platform.
+                </p>
               </div>
             )}
             {activeRoute === "/dashboard/tokens" && (
@@ -196,7 +198,9 @@ const DashboardLayout = () => {
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
                   Token Management
                 </h1>
-                <p className="text-gray-600">Monitor and manage platform tokens and transactions.</p>
+                <p className="text-gray-600">
+                  Monitor and manage platform tokens and transactions.
+                </p>
               </div>
             )}
             {activeRoute === "/dashboard/approvals" && (
@@ -204,7 +208,9 @@ const DashboardLayout = () => {
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
                   Pending Approvals
                 </h1>
-                <p className="text-gray-600">Review and approve pending artworks and user requests.</p>
+                <p className="text-gray-600">
+                  Review and approve pending artworks and user requests.
+                </p>
               </div>
             )}
             {activeRoute === "/dashboard/settings" && (
@@ -212,7 +218,9 @@ const DashboardLayout = () => {
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
                   System Settings
                 </h1>
-                <p className="text-gray-600">Configure platform settings and preferences.</p>
+                <p className="text-gray-600">
+                  Configure platform settings and preferences.
+                </p>
               </div>
             )}
           </div>

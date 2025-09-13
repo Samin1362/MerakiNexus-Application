@@ -16,6 +16,7 @@ import {
 // ✅ Import your DashboardHome component
 import DashboardHome from "../pages/DashboardHome";
 import DashboardUsers from "../pages/DashboardUsers";
+import DashboardArtworks from "../pages/DashboardArtworks";
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -183,16 +184,7 @@ const DashboardLayout = () => {
             {activeRoute === "/dashboard" && <DashboardHome />}
 
             {activeRoute === "/dashboard/users" && <DashboardUsers />}
-            {activeRoute === "/dashboard/artworks" && (
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                  Artwork Gallery
-                </h1>
-                <p className="text-gray-600">
-                  Browse and manage all artworks on the platform.
-                </p>
-              </div>
-            )}
+            {activeRoute === "/dashboard/artworks" && <DashboardArtworks />}
             {activeRoute === "/dashboard/tokens" && (
               <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">

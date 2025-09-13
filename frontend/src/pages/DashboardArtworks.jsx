@@ -21,6 +21,7 @@ import {
 
 const DashboardArtworks = () => {
   // Mock data with more variety
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const mockArtworks = [
     {
       id: 1,

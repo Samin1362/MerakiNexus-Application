@@ -17,6 +17,7 @@ import {
 import DashboardHome from "../pages/DashboardHome";
 import DashboardUsers from "../pages/DashboardUsers";
 import DashboardArtworks from "../pages/DashboardArtworks";
+import DashboardToken from "../pages/DashboardToken";
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -185,16 +186,7 @@ const DashboardLayout = () => {
 
             {activeRoute === "/dashboard/users" && <DashboardUsers />}
             {activeRoute === "/dashboard/artworks" && <DashboardArtworks />}
-            {activeRoute === "/dashboard/tokens" && (
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                  Token Management
-                </h1>
-                <p className="text-gray-600">
-                  Monitor and manage platform tokens and transactions.
-                </p>
-              </div>
-            )}
+            {activeRoute === "/dashboard/tokens" && <DashboardToken />}
             {activeRoute === "/dashboard/approvals" && (
               <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">

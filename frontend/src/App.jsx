@@ -12,6 +12,8 @@ import LoginForm from "./pages/LoginForm";
 import DashboardHome from "./pages/DashboardHome";
 import DashboardLayout from "./components/DashboardLayout";
 import ScrollToTop from "./components/ScrollToTop";
+import DashboardArtworks from "./pages/DashboardArtworks";
+import DashboardToken from "./pages/DashboardToken";
 
 function App() {
   return (
@@ -32,8 +34,8 @@ function App() {
         <Route path="/dashboardHome" element={<DashboardLayout />}>
           <Route index element={<DashboardHome />} /> {/* /dashboard */}
           <Route path="users" element={<div>Users Management</div>} />
-          <Route path="artworks" element={<div>Artworks Management</div>} />
-          <Route path="tokens" element={<div>Token Analytics</div>} />
+          <Route path="artworks" element={<DashboardArtworks />} />
+          <Route path="tokens" element={<DashboardToken />} />
           <Route path="approvals" element={<div>Approvals</div>} />
           <Route path="settings" element={<div>Admin Settings</div>} />
         </Route>

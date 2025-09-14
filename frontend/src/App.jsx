@@ -15,6 +15,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import DashboardArtworks from "./pages/DashboardArtworks";
 import DashboardToken from "./pages/DashboardToken";
 import DashboardApprovals from "./pages/DashboardApprovals";
+import DashboardSettings from "./pages/DashboardSettings";
 
 function App() {
   return (
@@ -38,7 +39,7 @@ function App() {
           <Route path="artworks" element={<DashboardArtworks />} />
           <Route path="tokens" element={<DashboardToken />} />
           <Route path="approvals" element={<DashboardApprovals />} />
-          <Route path="settings" element={<div>Admin Settings</div>} />
+          <Route path="settings" element={<DashboardSettings />} />
         </Route>
       </Routes>
       <Footer />

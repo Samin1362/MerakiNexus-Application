@@ -19,6 +19,7 @@ import DashboardUsers from "../pages/DashboardUsers";
 import DashboardArtworks from "../pages/DashboardArtworks";
 import DashboardToken from "../pages/DashboardToken";
 import DashboardApprovals from "../pages/DashboardApprovals";
+import DashboardSettings from "../pages/DashboardSettings";
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -189,16 +190,7 @@ const DashboardLayout = () => {
             {activeRoute === "/dashboard/artworks" && <DashboardArtworks />}
             {activeRoute === "/dashboard/tokens" && <DashboardToken />}
             {activeRoute === "/dashboard/approvals" && <DashboardApprovals />}
-            {activeRoute === "/dashboard/settings" && (
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                  System Settings
-                </h1>
-                <p className="text-gray-600">
-                  Configure platform settings and preferences.
-                </p>
-              </div>
-            )}
+            {activeRoute === "/dashboard/settings" && <DashboardSettings />}
           </div>
         </main>
       </div>

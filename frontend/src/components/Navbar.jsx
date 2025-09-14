@@ -98,7 +98,8 @@ function Navbar() {
     { label: "Upload Artwork", to: "/upload" },
     { label: "About", to: "/about" },
     { label: "Chatbot", to: "/chatbot"},
-    { label: "DashBoard", to: "/dashboardHome"},
+    { label: "Admin DashBoard", to: "/dashboard"},
+    { label: "Artist DashBoard", to: "/artist-dashboard"}
   ];
 
   return (

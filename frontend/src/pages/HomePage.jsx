@@ -1,188 +1,351 @@
 import { useEffect, useRef, useState, memo } from "react";
-import { useNavigate } from "react-router-dom";
+import { 
+  Sparkles, 
+  Heart, 
+  TrendingUp, 
+  Coins,
+  Eye,
+  Target,
+  Zap,
+  ArrowRight,
+  ExternalLink
+} from "lucide-react";
 
-// Memoized Artwork Card
-const ArtCard = memo(({ art }) => (
-  <a
-    key={art.id}
-    href="/gallery"
-    className="group block overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-xl shadow-indigo-950/20 transform transition-transform duration-300 hover:scale-105"
-  >
-    <div className="relative aspect-[3/2] w-full overflow-hidden bg-black">
+// Memoized Artwork Card Component
+const ArtworkCard = memo(({ artwork }) => (
+  <div className="group relative overflow-hidden rounded-3xl border border-white/15 bg-white/8 backdrop-blur-xl shadow-2xl shadow-indigo-950/25 transform transition-all duration-700 hover:scale-[1.02] hover:shadow-purple-500/25 hover:border-purple-400/40">
+    {/* Gradient overlay effect */}
+    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-indigo-500/0 to-purple-500/0 opacity-0 transition-opacity duration-700 group-hover:opacity-15" />
+    
+    {/* Image container */}
+    <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-gray-900 to-black">
       <img
-        src={art.image_url}
-        alt={art.title}
+        src={artwork.image_url}
+        alt={artwork.title}
         loading="lazy"
-        className="h-full w-full object-cover"
+        className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110"
       />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      
+      {/* Dark overlay on hover */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      
+      {/* View Details Button */}
+      <div className="absolute inset-x-4 bottom-4 opacity-0 translate-y-6 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0">
+        <button className="w-full flex items-center justify-center gap-2 bg-white/95 backdrop-blur-sm text-gray-900 px-4 py-3 rounded-2xl font-semibold hover:bg-white transition-all duration-300 shadow-lg">
+          <Eye className="w-4 h-4" />
+          View Details
+        </button>
+      </div>
     </div>
-    <div className="p-4">
-      <h3 className="text-lg font-semibold">{art.title}</h3>
-      <p className="text-sm text-white/80">{art.artist}</p>
-      {art.classification && (
-        <p className="mt-1 text-xs text-white/70">
-          {art.classification}
-          {typeof art.classification_percentage === "number" &&
-            ` • ${Math.round(art.classification_percentage)}%`}
-        </p>
+    
+    {/* Card content */}
+    <div className="p-6">
+      <h3 className="text-xl font-bold text-white truncate mb-2">{artwork.title}</h3>
+      <p className="text-white/75 mb-3">{artwork.artist}</p>
+      
+      {artwork.classification && (
+        <div className="flex items-center gap-3">
+          <span className="px-3 py-1 bg-gradient-to-r from-purple-500/25 to-indigo-500/25 text-purple-200 text-sm rounded-full font-medium border border-purple-400/30">
+            {artwork.classification}
+          </span>
+          {typeof artwork.classification_percentage === "number" && (
+            <span className="text-sm text-white/50 font-medium">
+              {Math.round(artwork.classification_percentage)}% confidence
+            </span>
+          )}
+        </div>
       )}
     </div>
-  </a>
+  </div>
 ));
+
+// Feature Card Component
+const FeatureCard = memo(({ feature }) => {
+  const IconComponent = feature.icon;
+  
+  return (
+    <div className="group relative overflow-hidden rounded-3xl bg-white/10 backdrop-blur-xl border border-white/15 p-8 shadow-2xl shadow-indigo-950/20 transition-all duration-700 hover:-translate-y-3 hover:bg-white/15 hover:shadow-purple-500/30 hover:border-purple-400/40">
+      {/* Animated background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-indigo-500/0 to-purple-500/0 opacity-0 transition-opacity duration-700 group-hover:opacity-15" />
+      
+      <div className="relative z-10">
+        {/* Icon container */}
+        <div className="w-18 h-18 rounded-3xl bg-gradient-to-br from-purple-400 via-indigo-500 to-purple-600 flex items-center justify-center mb-6 transform transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-xl">
+          <IconComponent className="w-9 h-9 text-white" />
+        </div>
+        
+        <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-purple-100 transition-colors duration-300">
+          {feature.title}
+        </h3>
+        
+        <p className="text-white/85 leading-relaxed text-lg">
+          {feature.description}
+        </p>
+        
+        {/* Animated bottom accent line */}
+        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r from-purple-500 via-indigo-400 to-purple-500 scale-x-0 origin-left transition-transform duration-700 group-hover:scale-x-100" />
+      </div>
+    </div>
+  );
+});
 
 function HomePage() {
   const [artworks, setArtworks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const rootRef = useRef(null);
-  const navigate = useNavigate();
+  
+  // Navigation handlers
+  const navigateToGallery = () => {
+    window.location.href = "/gallery";
+  };
+  
+  const handleLearnMore = () => {
+    window.location.href = "/about";
+  };
 
-  const heroTitleRef = useRef(null);
-  const heroTaglineRef = useRef(null);
-  const ctaRef = useRef(null);
-  const heroMediaRef = useRef(null);
-
-  // Load a few artworks for homepage preview
+  // Load featured artworks
   useEffect(() => {
-    fetch("/art-data.json")
-      .then((res) => res.json())
-      .then((data) => {
-        const list = Array.isArray(data)
-          ? data
-          : Array.isArray(data?.artworks)
-          ? data.artworks
+    const loadArtworks = async () => {
+      try {
+        const response = await fetch("/art-data.json");
+        const data = await response.json();
+        const artworksList = Array.isArray(data) 
+          ? data 
+          : Array.isArray(data?.artworks) 
+          ? data.artworks 
           : [];
-        setArtworks(list.slice(0, 4));
-      })
-      .catch(() => setArtworks([]));
+        
+        setArtworks(artworksList.slice(0, 4));
+      } catch (error) {
+        console.error("Failed to load artworks:", error);
+        setArtworks([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadArtworks();
   }, []);
 
-  const features = [
+  const platformFeatures = [
     {
-      title: "AI Art",
-      desc: "Generative artworks powered by state-of-the-art models.",
+      title: "AI Art Generation",
+      description: "Create stunning artworks with state-of-the-art AI models and neural networks for unlimited creative possibilities.",
+      icon: Sparkles,
     },
     {
-      title: "Sentiment Analysis",
-      desc: "Understand audience emotion across creative content.",
+      title: "Sentiment Analysis", 
+      description: "Deep understanding of emotional resonance across all creative content using advanced machine learning.",
+      icon: Heart,
     },
     {
       title: "Aesthetic Scoring",
-      desc: "Quantify visual appeal with learned aesthetics metrics.",
+      description: "Quantify visual appeal using sophisticated algorithms trained on millions of artistic masterpieces.",
+      icon: TrendingUp,
     },
     {
       title: "Web3 Collectibles",
-      desc: "Mint, trade, and showcase on-chain creative assets.",
+      description: "Mint, trade, and showcase blockchain-verified digital assets with full ownership transparency.",
+      icon: Coins,
     },
   ];
 
   return (
     <div
       ref={rootRef}
-      className="relative min-h-screen w-full md:mt-[50px] overflow-x-hidden overflow-y-auto bg-gradient-to-br from-purple-500 via-indigo-600 to-indigo-700 text-white"
+      className="relative min-h-screen w-full md:mt-[50px] overflow-x-hidden bg-gradient-to-br from-purple-500 via-indigo-600 to-indigo-700"
     >
-      {/* Light gradient overlays constrained to viewport */}
-      <div className="pointer-events-none absolute top-0 right-0 h-64 w-64 rounded-full bg-white/5 blur-2xl hidden md:block" />
-      <div className="pointer-events-none absolute bottom-0 left-0 h-64 w-64 rounded-full bg-fuchsia-400/10 blur-2xl hidden md:block" />
+      {/* Enhanced ambient lighting effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-white/6 blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-fuchsia-400/12 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-[300px] w-[300px] rounded-full bg-cyan-400/8 blur-2xl" />
+      </div>
 
-      {/* Grid wrapper */}
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-14 sm:px-6 lg:px-8 md:gap-12 md:py-16">
+      {/* Main content container */}
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-20 sm:px-8 lg:px-12 space-y-24">
+        
         {/* Hero Section */}
-        <section className="relative grid items-center gap-8 md:grid-cols-2">
-          <div className="text-center md:text-left">
-            <h1
-              ref={heroTitleRef}
-              className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight drop-shadow"
-            >
-              Welcome
+        <section className="grid items-center gap-16 lg:grid-cols-2">
+          <div className="text-center lg:text-left space-y-10">
+            {/* Hero headline */}
+            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tight">
+              <span className="bg-gradient-to-r from-white via-purple-100 to-indigo-200 bg-clip-text text-transparent drop-shadow-2xl leading-tight">
+                Welcome
+              </span>
             </h1>
-            <p
-              ref={heroTaglineRef}
-              className="mt-4 text-base sm:text-lg md:text-xl text-white/90 max-w-2xl mx-auto md:mx-0"
-            >
-              <span className="font-bold">MerakiNexus</span> is where AI-driven
-              creativity meets Web3. Artists can showcase their work while AI
-              evaluates its style and value, and blockchain enables secure,
-              transparent ownership and trading of digital art.
+            
+            {/* Hero description */}
+            <p className="text-xl sm:text-2xl lg:text-3xl text-white/90 max-w-3xl mx-auto lg:mx-0 leading-relaxed font-light">
+              <span className="font-bold text-white">MerakiNexus</span> is where AI-driven
+              creativity meets Web3 innovation. Artists showcase their masterpieces while AI
+              evaluates style and value, and blockchain ensures secure, transparent ownership.
             </p>
-            <div className="mt-8">
+            
+            {/* CTA buttons */}
+            <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start">
               <button
-                ref={ctaRef}
-                className="rounded-2xl bg-white/10 px-6 py-3 sm:px-8 text-white backdrop-blur-md shadow-lg shadow-indigo-900/20 hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/40 transition-transform transform hover:scale-105"
-                onClick={() => navigate("/gallery")}
+                onClick={navigateToGallery}
+                className="group relative overflow-hidden rounded-3xl bg-white/12 backdrop-blur-xl px-10 py-5 text-white shadow-2xl shadow-indigo-900/25 border border-white/25 transition-all duration-500 hover:bg-white/18 hover:scale-105 hover:shadow-purple-500/35 focus:outline-none focus:ring-4 focus:ring-white/30"
               >
-                Explore Now
+                {/* Button shimmer effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] transition-transform duration-1000 group-hover:translate-x-[200%]" />
+                
+                <div className="relative flex items-center gap-3 font-bold text-lg">
+                  <Sparkles className="w-6 h-6" />
+                  Explore Gallery
+                  <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-2" />
+                </div>
+              </button>
+              
+              <button
+                onClick={handleLearnMore}
+                className="group rounded-3xl border-2 border-white/30 backdrop-blur-sm px-10 py-5 text-white transition-all duration-500 hover:bg-white/15 hover:scale-105 hover:border-white/50 focus:outline-none focus:ring-4 focus:ring-white/30"
+              >
+                <div className="flex items-center gap-3 font-bold text-lg">
+                  <ExternalLink className="w-5 h-5" />
+                  Learn More
+                </div>
               </button>
             </div>
           </div>
 
-          {/* Hero Media replaced with video for smoothness */}
-          <div
-            ref={heroMediaRef}
-            className="relative mx-auto w-full max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-2xl"
-          >
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-fuchsia-400/10 via-cyan-300/10 to-indigo-400/10 blur-xl" />
-            <img
-              src="https://images.unsplash.com/photo-1752649935031-7c35f43b24b0?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nzh8fGNyZWF0aXZlJTIwYXJ0d29ya3xlbnwwfHwwfHx8MA%3D%3D"
-              alt="AI creativity animation"
-              className="relative w-full h-full object-cover rounded-2xl"
-            />
+          {/* Hero visual card */}
+          <div className="relative mx-auto w-full max-w-2xl">
+            <div className="group relative overflow-hidden rounded-[2rem] border-2 border-white/25 bg-white/10 backdrop-blur-xl shadow-2xl shadow-indigo-950/40 transition-all duration-700 hover:scale-105 hover:rotate-1 hover:shadow-purple-500/30">
+              {/* Animated border glow */}
+              <div className="absolute -inset-1 rounded-[2rem] bg-gradient-to-r from-fuchsia-400/25 via-cyan-300/25 to-indigo-400/25 blur-xl opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
+              
+              <div className="relative">
+                <img
+                  src="https://images.unsplash.com/photo-1752649935031-7c35f43b24b0?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nzh8fGNyZWF0aXZlJTIwYXJ0d29ya3xlbnwwfHwwfHx8MA%3D%3D"
+                  alt="AI creativity showcase"
+                  className="w-full h-96 object-cover rounded-[2rem] transition-transform duration-1000 group-hover:scale-110"
+                />
+                
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-purple-900/60 via-transparent to-transparent rounded-[2rem]" />
+                
+                {/* Floating info card */}
+                <div className="absolute bottom-8 left-8 right-8 transform transition-all duration-500 group-hover:translate-y-[-4px]">
+                  <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl">
+                    <h3 className="text-gray-900 font-bold text-xl">AI-Powered Creativity</h3>
+                    <p className="text-gray-700 mt-2">Where artistic vision meets cutting-edge technology</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* About Section */}
-        <section className="relative rounded-2xl bg-white/10 p-6 sm:p-8 backdrop-blur-md shadow-xl shadow-indigo-950/10">
-          <h2 className="text-2xl sm:text-3xl font-bold">About</h2>
-          <div className="mt-3 space-y-3 text-sm sm:text-base text-white/90">
-            <p>
-              <strong>Vision:</strong> Democratize creative expression where AI
-              insight and decentralized ownership help every creator find value
-              and community.
+        <section className="space-y-16">
+          <div className="text-center space-y-4">
+            <h2 className="text-5xl sm:text-6xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+              About MerakiNexus
+            </h2>
+            <p className="text-xl text-white/80 max-w-4xl mx-auto leading-relaxed">
+              Pioneering the future of digital art through AI innovation and blockchain technology
             </p>
-            <p>
-              <strong>Mission:</strong> Build tools that analyze, enhance, and
-              tokenize creative work — using machine learning to measure
-              aesthetics, sentiment, and memorability, and Web3 primitives to
-              reward and track provenance.
-            </p>
+          </div>
+          
+          <div className="grid lg:grid-cols-2 gap-10">
+            {/* Vision Card */}
+            <div className="group relative overflow-hidden rounded-[2rem] bg-white/12 backdrop-blur-xl p-10 shadow-2xl shadow-indigo-950/20 border border-white/15 transition-all duration-700 hover:scale-105 hover:bg-white/18 hover:shadow-purple-500/25">
+              <div className="absolute top-8 left-8 w-16 h-16 rounded-3xl bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center shadow-xl">
+                <Target className="w-8 h-8 text-white" />
+              </div>
+              
+              <div className="pt-20">
+                <h3 className="text-3xl font-bold mb-6 text-white">Our Vision</h3>
+                <p className="text-white/90 text-xl leading-relaxed">
+                  Democratize creative expression where AI insight and decentralized ownership 
+                  help every creator find value, recognition, and community in the digital renaissance.
+                </p>
+              </div>
+              
+              <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-500 via-indigo-400 to-purple-500 scale-x-0 transition-transform duration-700 group-hover:scale-x-100" />
+            </div>
+
+            {/* Mission Card */}
+            <div className="group relative overflow-hidden rounded-[2rem] bg-white/12 backdrop-blur-xl p-10 shadow-2xl shadow-indigo-950/20 border border-white/15 transition-all duration-700 hover:scale-105 hover:bg-white/18 hover:shadow-purple-500/25">
+              <div className="absolute top-8 left-8 w-16 h-16 rounded-3xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center shadow-xl">
+                <Zap className="w-8 h-8 text-white" />
+              </div>
+              
+              <div className="pt-20">
+                <h3 className="text-3xl font-bold mb-6 text-white">Our Mission</h3>
+                <p className="text-white/90 text-xl leading-relaxed">
+                  Build revolutionary tools that analyze, enhance, and tokenize creative work 
+                  using machine learning and Web3 primitives to reward artistic excellence.
+                </p>
+              </div>
+              
+              <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-indigo-500 via-purple-400 to-indigo-500 scale-x-0 transition-transform duration-700 group-hover:scale-x-100" />
+            </div>
           </div>
         </section>
 
-        {/* Featured Artworks */}
-        <section className="relative">
-          <h2 className="mb-4 text-2xl sm:text-3xl font-bold">
-            Featured Artworks
-          </h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {artworks.map((art) => (
-              <ArtCard key={art.id} art={art} />
-            ))}
+        {/* Featured Artworks Section */}
+        <section className="space-y-16">
+          <div className="text-center space-y-6">
+            <h2 className="text-5xl sm:text-6xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+              Featured Artworks
+            </h2>
+            <p className="text-xl text-white/80 max-w-4xl mx-auto leading-relaxed">
+              Discover exceptional pieces from our curated collection of AI-enhanced digital masterpieces
+            </p>
           </div>
-          <div className="mt-4">
-            <a
-              href="/gallery"
-              className="inline-block rounded-xl bg-white text-black px-5 py-3 text-sm font-semibold shadow-lg shadow-black/10 transition-transform transform hover:scale-105"
+          
+          {/* Artworks grid */}
+          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            {isLoading ? (
+              // Loading skeleton
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="aspect-[4/3] bg-white/10 rounded-3xl mb-4" />
+                  <div className="h-4 bg-white/10 rounded mb-2" />
+                  <div className="h-3 bg-white/10 rounded w-2/3" />
+                </div>
+              ))
+            ) : (
+              artworks.map((artwork) => (
+                <ArtworkCard key={artwork.id} artwork={artwork} />
+              ))
+            )}
+          </div>
+          
+          {/* Gallery CTA button */}
+          <div className="text-center pt-8">
+            <button
+              onClick={navigateToGallery}
+              className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 px-12 py-6 text-white font-bold text-xl shadow-2xl shadow-purple-500/30 transition-all duration-500 hover:scale-105 hover:shadow-purple-500/50 focus:outline-none focus:ring-4 focus:ring-purple-400/50"
             >
-              Browse Full Gallery
-            </a>
+              {/* Button shimmer effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent translate-x-[-200%] transition-transform duration-1000 group-hover:translate-x-[200%]" />
+              
+              <div className="relative flex items-center gap-4">
+                Browse Full Gallery
+                <ArrowRight className="w-6 h-6 transition-transform duration-300 group-hover:translate-x-2" />
+              </div>
+            </button>
           </div>
         </section>
 
         {/* Features Section */}
-        <section className="relative">
-          <h2 className="mb-6 text-2xl sm:text-3xl font-bold">Features</h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((f, i) => (
-              <div
-                key={f.title}
-                className="group rounded-2xl bg-white/10 p-6 backdrop-blur-md shadow-xl shadow-indigo-950/10 transition-transform transform hover:-translate-y-1 duration-300"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 text-white">
-                  <span className="text-lg font-semibold">{i + 1}</span>
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">{f.title}</h3>
-                <p className="mt-2 text-sm text-white/90">{f.desc}</p>
-                <div className="mt-4 h-1 w-10 scale-x-0 rounded-full bg-white/60 transition-transform duration-300 group-hover:scale-x-100" />
-              </div>
+        <section className="space-y-16">
+          <div className="text-center space-y-6">
+            <h2 className="text-5xl sm:text-6xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+              Platform Features
+            </h2>
+            <p className="text-xl text-white/80 max-w-4xl mx-auto leading-relaxed">
+              Experience the future of digital art with our cutting-edge AI and blockchain technology suite
+            </p>
+          </div>
+          
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            {platformFeatures.map((feature, index) => (
+              <FeatureCard key={feature.title} feature={feature} index={index} />
             ))}
           </div>
         </section>

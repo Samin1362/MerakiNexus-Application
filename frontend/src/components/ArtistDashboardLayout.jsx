@@ -13,15 +13,15 @@ import {
 } from "lucide-react";
 
 // ✅ Import your Artist Dashboard pages
-import ArtistOverview from "../pages/ArtistOverview";
 import ArtistMyArtworks from "../pages/ArtistMyArtworks";
 import ArtistUpload from "../pages/ArtistUpload";
 import ArtistInsights from "../pages/ArtistInsights";
 import ArtistSettings from "../pages/ArtistSettings";
+import ArtistHome from "../pages/ArtistHome";
 
 const ArtistDashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeRoute, setActiveRoute] = useState("/artist");
+  const [activeRoute, setActiveRoute] = useState("/artist-dashboard");
 
   const navigationItems = [
     { path: "/artist-dashboard", label: "Overview", icon: LayoutDashboard },
@@ -32,8 +32,8 @@ const ArtistDashboardLayout = () => {
   ];
 
   const isActiveRoute = (path) => {
-    if (path === "/artist") {
-      return activeRoute === "/artist";
+    if (path === "/artist-dashboard") {
+      return activeRoute === "/artist-dashboard";
     }
     return activeRoute.startsWith(path);
   };
@@ -180,7 +180,7 @@ const ArtistDashboardLayout = () => {
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
           <div className="p-6">
-            {activeRoute === "/artist" && <ArtistOverview />}
+            {activeRoute === "/artist-dashboard" && <ArtistHome />}
             {activeRoute === "/artist/my-artworks" && <ArtistMyArtworks />}
             {activeRoute === "/artist/upload" && <ArtistUpload />}
             {activeRoute === "/artist/insights" && <ArtistInsights />}

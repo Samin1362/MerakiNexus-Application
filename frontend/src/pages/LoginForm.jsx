@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
 
 const LoginForm = () => {
@@ -11,61 +10,20 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState('');
+  const [isVisible, setIsVisible] = useState(false);
 
-  // Refs for GSAP animations
+  // Refs for animations
   const containerRef = useRef(null);
-  const headerRef = useRef(null);
-  // const formRef = useRef(null);
-  const emailRef = useRef(null);
-  const passwordRef = useRef(null);
   const buttonRef = useRef(null);
-  const linksRef = useRef(null);
 
-  // Initialize animations on mount
+  // Initialize entrance animations on mount
   useEffect(() => {
-    const tl = gsap.timeline({ delay: 0.2 });
-
-    // Container entrance
-    gsap.set(containerRef.current, { opacity: 0, y: 50, scale: 0.9 });
-    tl.to(containerRef.current, {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      duration: 0.8,
-      ease: "power3.out"
-    });
-
-    // Header animation
-    gsap.set(headerRef.current, { opacity: 0, y: -30 });
-    tl.to(headerRef.current, {
-      opacity: 1,
-      y: 0,
-      duration: 0.6,
-      ease: "power2.out"
-    }, "-=0.4");
-
-    // Form elements stagger animation
-    gsap.set([emailRef.current, passwordRef.current, buttonRef.current], { 
-      opacity: 0, 
-      x: -30 
-    });
-    tl.to([emailRef.current, passwordRef.current, buttonRef.current], {
-      opacity: 1,
-      x: 0,
-      duration: 0.5,
-      stagger: 0.1,
-      ease: "power2.out"
-    }, "-=0.3");
-
-    // Links animation
-    gsap.set(linksRef.current, { opacity: 0, y: 20 });
-    tl.to(linksRef.current, {
-      opacity: 1,
-      y: 0,
-      duration: 0.4,
-      ease: "power2.out"
-    }, "-=0.2");
-
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 200);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   // Handle input changes
@@ -82,6 +40,11 @@ const LoginForm = () => {
         ...prev,
         [name]: ''
       }));
+    }
+
+    // Clear API error when user types
+    if (apiError) {
+      setApiError('');
     }
   };
 
@@ -107,87 +70,172 @@ const LoginForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Shake animation using CSS classes
+  const triggerShakeAnimation = () => {
+    const container = containerRef.current;
+    if (container) {
+      container.classList.add('shake');
+      setTimeout(() => {
+        container.classList.remove('shake');
+      }, 400);
+    }
+  };
+
+  // Success animation using CSS classes
+  const triggerSuccessAnimation = () => {
+    const container = containerRef.current;
+    if (container) {
+      container.classList.add('success-pulse');
+      setTimeout(() => {
+        container.classList.remove('success-pulse');
+      }, 400);
+    }
+  };
+
   // Handle form submission
   const handleSubmit = async () => {
     if (!validateForm()) {
-      // Error shake animation
-      gsap.to(containerRef.current, {
-        x: [-8, 8, -8, 8, 0],
-        duration: 0.4,
-        ease: "power2.inOut"
-      });
+      triggerShakeAnimation();
       return;
     }
 
     setIsLoading(true);
+    setApiError('');
 
-    // Simulate API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Login successful:', formData);
-      
-      // Success animation
-      gsap.to(containerRef.current, {
-        scale: 1.05,
-        duration: 0.2,
-        yoyo: true,
-        repeat: 1,
-        ease: "power2.inOut"
+      const response = await fetch('http://localhost:3000/meraki-nexus-api/user/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
       });
+
+      const data = await response.json();
+
+      if (data.success === true) {
+        console.log('Login successful');
+        triggerSuccessAnimation();
+      } else {
+        // Login failed - show error message and shake animation
+        setApiError('Invalid email or password');
+        triggerShakeAnimation();
+      }
       
     } catch (error) {
       console.error('Login failed:', error);
+      
+      // Network or other error - show user-friendly message
+      setApiError('Unable to connect to server. Please try again.');
+      triggerShakeAnimation();
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Button hover animations
-  const handleButtonHover = () => {
-    gsap.to(buttonRef.current, {
-      scale: 1.02,
-      boxShadow: "0 10px 30px rgba(59, 130, 246, 0.3)",
-      duration: 0.3,
-      ease: "power2.out"
-    });
-  };
-
-  const handleButtonLeave = () => {
-    gsap.to(buttonRef.current, {
-      scale: 1,
-      boxShadow: "0 4px 15px rgba(59, 130, 246, 0.2)",
-      duration: 0.3,
-      ease: "power2.out"
-    });
-  };
-
-  // Input focus animations
-  const handleInputFocus = (inputRef) => {
-    gsap.to(inputRef.current, {
-      scale: 1.01,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-  };
-
-  const handleInputBlur = (inputRef) => {
-    gsap.to(inputRef.current, {
-      scale: 1,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-purple-50 flex items-center justify-center p-4 md:p-10">
+      <style jsx>{`
+        .entrance {
+          animation: slideInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .header-entrance {
+          animation: slideInDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+        }
+        
+        .form-entrance {
+          animation: slideInLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+        }
+        
+        .links-entrance {
+          animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+        }
+        
+        .shake {
+          animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+        }
+        
+        .success-pulse {
+          animation: successPulse 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+        }
+        
+        .button-hover {
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .button-hover:hover {
+          transform: scale(1.02);
+          box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+        
+        .input-focus {
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .input-focus:focus {
+          transform: scale(1.01);
+        }
+        
+        @keyframes slideInUp {
+          from {
+            opacity: 0;
+            transform: translateY(50px) scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        
+        @keyframes slideInDown {
+          from {
+            opacity: 0;
+            transform: translateY(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes slideInLeft {
+          from {
+            opacity: 0;
+            transform: translateX(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+          20%, 40%, 60%, 80% { transform: translateX(8px); }
+        }
+        
+        @keyframes successPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+      `}</style>
+      
       <div 
         ref={containerRef}
-        className="w-full max-w-md bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden"
+        className={`w-full max-w-md bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden transition-all duration-300 ${
+          isVisible ? 'entrance' : 'opacity-0'
+        }`}
       >
         {/* Header Section */}
         <div 
-          ref={headerRef}
-          className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 px-8 py-10 text-center relative overflow-hidden"
+          className={`bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 px-8 py-10 text-center relative overflow-hidden ${
+            isVisible ? 'header-entrance' : 'opacity-0'
+          }`}
         >
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="relative z-10">
@@ -202,9 +250,9 @@ const LoginForm = () => {
 
         {/* Form Section */}
         <div className="p-8 md:p-10">
-          <div className="space-y-6">
+          <div className={`space-y-6 ${isVisible ? 'form-entrance' : 'opacity-0'}`}>
             {/* Email Field */}
-            <div ref={emailRef} className="space-y-2">
+            <div className="space-y-2">
               <label className="block text-sm font-semibold text-slate-700">
                 Email Address
               </label>
@@ -215,9 +263,7 @@ const LoginForm = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  onFocus={() => handleInputFocus(emailRef)}
-                  onBlur={() => handleInputBlur(emailRef)}
-                  className={`w-full pl-12 pr-4 py-4 border-2 rounded-2xl bg-slate-50/50 transition-all duration-300 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 ${
+                  className={`input-focus w-full pl-12 pr-4 py-4 border-2 rounded-2xl bg-slate-50/50 transition-all duration-300 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 ${
                     errors.email 
                       ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-100' 
                       : 'border-slate-200 hover:border-slate-300'
@@ -231,7 +277,7 @@ const LoginForm = () => {
             </div>
 
             {/* Password Field */}
-            <div ref={passwordRef} className="space-y-2">
+            <div className="space-y-2">
               <label className="block text-sm font-semibold text-slate-700">
                 Password
               </label>
@@ -242,9 +288,7 @@ const LoginForm = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  onFocus={() => handleInputFocus(passwordRef)}
-                  onBlur={() => handleInputBlur(passwordRef)}
-                  className={`w-full pl-12 pr-14 py-4 border-2 rounded-2xl bg-slate-50/50 transition-all duration-300 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 ${
+                  className={`input-focus w-full pl-12 pr-14 py-4 border-2 rounded-2xl bg-slate-50/50 transition-all duration-300 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 ${
                     errors.password 
                       ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-100' 
                       : 'border-slate-200 hover:border-slate-300'
@@ -269,9 +313,7 @@ const LoginForm = () => {
               ref={buttonRef}
               onClick={handleSubmit}
               disabled={isLoading}
-              onMouseEnter={handleButtonHover}
-              onMouseLeave={handleButtonLeave}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 px-6 rounded-2xl font-semibold text-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg flex items-center justify-center group"
+              className="button-hover w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 px-6 rounded-2xl font-semibold text-lg focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg flex items-center justify-center group"
             >
               {isLoading ? (
                 <>
@@ -285,10 +327,19 @@ const LoginForm = () => {
                 </>
               )}
             </button>
+
+            {/* API Error Message */}
+            {apiError && (
+              <div className="text-center animate-in slide-in-from-top duration-300">
+                <p className="text-red-500 text-sm font-medium bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                  {apiError}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Footer Links */}
-          <div ref={linksRef} className="mt-8 space-y-4">
+          <div className={`mt-8 space-y-4 ${isVisible ? 'links-entrance' : 'opacity-0'}`}>
             <div className="text-center">
               <button className="text-sm text-blue-600 hover:text-blue-800 font-medium hover:underline transition-all duration-200 px-2 py-1 rounded-lg hover:bg-blue-50">
                 Forgot your password?

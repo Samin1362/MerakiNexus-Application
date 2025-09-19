@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { User } from "lucide-react";
 import LogoutButton from "./LogoutButton";
@@ -12,8 +12,7 @@ function Navbar() {
   const mobileMenuRef = useRef(null);
   const underlineRefs = useRef([]);
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
-  const { isAuthenticated, role } = useAuth();
+  const { isAuthenticated, role, user } = useAuth();
 
   useEffect(() => {
     const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -97,9 +96,21 @@ function Navbar() {
 
   const toggleMenu = () => setIsOpen((prev) => !prev);
 
-  // Dynamic links based on user role
+  // Dynamic links based on authentication and user role
   const getNavigationLinks = () => {
-    const baseLinks = [
+    if (!isAuthenticated) {
+      // Non-authenticated users see limited links + Login
+      return [
+        { label: "Home", to: "/" },
+        { label: "Art Gallery", to: "/gallery" },
+        { label: "About", to: "/about" },
+        { label: "Chatbot", to: "/chatbot" },
+        { label: "Login", to: "/login" },
+      ];
+    }
+
+    // Authenticated users see base links + role-specific dashboard
+    const authenticatedLinks = [
       { label: "Home", to: "/" },
       { label: "Art Gallery", to: "/gallery" },
       { label: "Upload Artwork", to: "/upload" },
@@ -107,21 +118,22 @@ function Navbar() {
       { label: "Chatbot", to: "/chatbot" },
     ];
 
-    if (isAuthenticated) {
-      if (role === "Admin") {
-        baseLinks.push({ label: "Admin Dashboard", to: "/dashboard" });
-      } else if (role === "Artist") {
-        baseLinks.push({ label: "Artist Dashboard", to: "/artist-dashboard" });
-      }
-    } else {
-      // Show dashboard links for non-authenticated users (they'll be redirected to login)
-      baseLinks.push(
-        { label: "Admin Dashboard", to: "/dashboard" },
-        { label: "Artist Dashboard", to: "/artist-dashboard" }
-      );
+    // Add role-specific dashboard link
+    if (role === "Admin") {
+      authenticatedLinks.push({ label: "Admin Dashboard", to: "/dashboard" });
+    } else if (role === "Artist") {
+      authenticatedLinks.push({
+        label: "Artist Dashboard",
+        to: "/artist-dashboard",
+      });
+    } else if (role === "User") {
+      authenticatedLinks.push({
+        label: "User Dashboard",
+        to: "/user-dashboard",
+      });
     }
 
-    return baseLinks;
+    return authenticatedLinks;
   };
 
   const links = getNavigationLinks();
@@ -146,21 +158,30 @@ function Navbar() {
               <Link
                 key={link.label}
                 to={link.to}
-                className="relative text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                className={
+                  link.label === "Login"
+                    ? "rounded-full bg-black text-white text-sm px-4 py-2 font-medium hover:bg-gray-800 transition-colors shadow-sm hover:shadow-md"
+                    : "relative text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                }
               >
                 {link.label}
-                <span
-                  ref={(el) => (underlineRefs.current[index] = el)}
-                  className="absolute left-0 -bottom-1 h-0.5 w-full bg-gray-900 scale-x-0 origin-right"
-                />
+                {link.label !== "Login" && (
+                  <span
+                    ref={(el) => (underlineRefs.current[index] = el)}
+                    className="absolute left-0 -bottom-1 h-0.5 w-full bg-gray-900 scale-x-0 origin-right"
+                  />
+                )}
               </Link>
             ))}
 
-            {isAuthenticated ? (
+            {isAuthenticated && (
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <User className="w-4 h-4" />
-                  <span className="font-medium">{role}</span>
+                <div className="flex flex-col text-xs text-gray-600">
+                  <div className="flex items-center gap-1">
+                    <User className="w-3 h-3" />
+                    <span className="font-medium">{user?.email || "User"}</span>
+                  </div>
+                  <span className="text-gray-500">{role}</span>
                 </div>
                 <LogoutButton
                   variant="default"
@@ -169,13 +190,6 @@ function Navbar() {
                   showText={false}
                 />
               </div>
-            ) : (
-              <Link
-                to="/login"
-                className="rounded-full bg-gray-900 text-white text-sm px-4 py-2 shadow-sm hover:shadow-md transition-shadow"
-              >
-                Login
-              </Link>
             )}
           </div>
 
@@ -217,16 +231,23 @@ function Navbar() {
               key={link.label}
               to={link.to}
               onClick={() => setIsOpen(false)}
-              className="block rounded-md px-3 py-2 text-base font-medium text-gray-800 hover:bg-gray-100"
+              className={
+                link.label === "Login"
+                  ? "block rounded-full bg-black text-white text-center px-3 py-2 text-base font-medium hover:bg-gray-800 transition-colors"
+                  : "block rounded-md px-3 py-2 text-base font-medium text-gray-800 hover:bg-gray-100"
+              }
             >
               {link.label}
             </Link>
           ))}
-          {isAuthenticated ? (
+          {isAuthenticated && (
             <div className="mt-2 space-y-2">
-              <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-gray-50 rounded-md">
-                <User className="w-4 h-4" />
-                <span className="font-medium">Logged in as {role}</span>
+              <div className="px-3 py-2 text-sm text-gray-600 bg-gray-50 rounded-md">
+                <div className="flex items-center gap-2 mb-1">
+                  <User className="w-4 h-4" />
+                  <span className="font-medium">{user?.email || "User"}</span>
+                </div>
+                <span className="text-gray-500 text-xs">Role: {role}</span>
               </div>
               <LogoutButton
                 variant="default"
@@ -235,13 +256,6 @@ function Navbar() {
                 showText={true}
               />
             </div>
-          ) : (
-            <Link
-              to="/login"
-              className="mt-2 block rounded-md bg-gray-900 text-white text-center px-3 py-2 text-base font-medium"
-            >
-              Login
-            </Link>
           )}
         </div>
       </div>

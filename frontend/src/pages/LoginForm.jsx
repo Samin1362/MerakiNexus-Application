@@ -1,16 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { getRoleBasedRedirectPath } from "../utils/auth";
 
 const LoginForm = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
+
   // State management
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [apiError, setApiError] = useState('');
+  const [apiError, setApiError] = useState("");
   const [isVisible, setIsVisible] = useState(false);
 
   // Refs for animations
@@ -22,29 +29,29 @@ const LoginForm = () => {
     const timer = setTimeout(() => {
       setIsVisible(true);
     }, 200);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
 
     // Clear errors when user types
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
+        [name]: "",
       }));
     }
 
     // Clear API error when user types
     if (apiError) {
-      setApiError('');
+      setApiError("");
     }
   };
 
@@ -54,16 +61,16 @@ const LoginForm = () => {
 
     // Email validation
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = "Please enter a valid email address";
     }
 
     // Password validation
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters long';
+      newErrors.password = "Password must be at least 6 characters long";
     }
 
     setErrors(newErrors);
@@ -74,9 +81,9 @@ const LoginForm = () => {
   const triggerShakeAnimation = () => {
     const container = containerRef.current;
     if (container) {
-      container.classList.add('shake');
+      container.classList.add("shake");
       setTimeout(() => {
-        container.classList.remove('shake');
+        container.classList.remove("shake");
       }, 400);
     }
   };
@@ -85,9 +92,9 @@ const LoginForm = () => {
   const triggerSuccessAnimation = () => {
     const container = containerRef.current;
     if (container) {
-      container.classList.add('success-pulse');
+      container.classList.add("success-pulse");
       setTimeout(() => {
-        container.classList.remove('success-pulse');
+        container.classList.remove("success-pulse");
       }, 400);
     }
   };
@@ -100,36 +107,54 @@ const LoginForm = () => {
     }
 
     setIsLoading(true);
-    setApiError('');
+    setApiError("");
 
     try {
-      const response = await fetch('http://localhost:3000/meraki-nexus-api/user/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
-      });
+      const response = await fetch(
+        "https://meraki-nexus-api.vercel.app/meraki-nexus-api/user/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (data.success === true) {
-        console.log('Login successful');
+        console.log("Login successful");
+
+        // Store tokens and update auth context
+        const { accessToken, refreshToken } = data.data;
+        login(accessToken, refreshToken);
+
+        // Trigger success animation
         triggerSuccessAnimation();
+
+        // Get user role from token and redirect accordingly
+        const userRole = JSON.parse(atob(accessToken.split(".")[1])).role;
+        const redirectPath =
+          location.state?.from?.pathname || getRoleBasedRedirectPath(userRole);
+
+        // Delay navigation to show success animation
+        setTimeout(() => {
+          navigate(redirectPath, { replace: true });
+        }, 800);
       } else {
         // Login failed - show error message and shake animation
-        setApiError('Invalid email or password');
+        setApiError(data.message || "Invalid email or password");
         triggerShakeAnimation();
       }
-      
     } catch (error) {
-      console.error('Login failed:', error);
-      
+      console.error("Login failed:", error);
+
       // Network or other error - show user-friendly message
-      setApiError('Unable to connect to server. Please try again.');
+      setApiError("Unable to connect to server. Please try again.");
       triggerShakeAnimation();
     } finally {
       setIsLoading(false);
@@ -142,44 +167,44 @@ const LoginForm = () => {
         .entrance {
           animation: slideInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        
+
         .header-entrance {
           animation: slideInDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
         }
-        
+
         .form-entrance {
           animation: slideInLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
         }
-        
+
         .links-entrance {
           animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
         }
-        
+
         .shake {
           animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
         }
-        
+
         .success-pulse {
           animation: successPulse 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
         }
-        
+
         .button-hover {
           transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        
+
         .button-hover:hover {
           transform: scale(1.02);
           box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
         }
-        
+
         .input-focus {
           transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        
+
         .input-focus:focus {
           transform: scale(1.01);
         }
-        
+
         @keyframes slideInUp {
           from {
             opacity: 0;
@@ -190,7 +215,7 @@ const LoginForm = () => {
             transform: translateY(0) scale(1);
           }
         }
-        
+
         @keyframes slideInDown {
           from {
             opacity: 0;
@@ -201,7 +226,7 @@ const LoginForm = () => {
             transform: translateY(0);
           }
         }
-        
+
         @keyframes slideInLeft {
           from {
             opacity: 0;
@@ -212,29 +237,48 @@ const LoginForm = () => {
             transform: translateX(0);
           }
         }
-        
+
         @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
-          20%, 40%, 60%, 80% { transform: translateX(8px); }
+          0%,
+          100% {
+            transform: translateX(0);
+          }
+          10%,
+          30%,
+          50%,
+          70%,
+          90% {
+            transform: translateX(-8px);
+          }
+          20%,
+          40%,
+          60%,
+          80% {
+            transform: translateX(8px);
+          }
         }
-        
+
         @keyframes successPulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
+          0%,
+          100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
         }
       `}</style>
-      
-      <div 
+
+      <div
         ref={containerRef}
         className={`w-full max-w-md bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden transition-all duration-300 ${
-          isVisible ? 'entrance' : 'opacity-0'
+          isVisible ? "entrance" : "opacity-0"
         }`}
       >
         {/* Header Section */}
-        <div 
+        <div
           className={`bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 px-8 py-10 text-center relative overflow-hidden ${
-            isVisible ? 'header-entrance' : 'opacity-0'
+            isVisible ? "header-entrance" : "opacity-0"
           }`}
         >
           <div className="absolute inset-0 bg-black/10"></div>
@@ -250,7 +294,9 @@ const LoginForm = () => {
 
         {/* Form Section */}
         <div className="p-8 md:p-10">
-          <div className={`space-y-6 ${isVisible ? 'form-entrance' : 'opacity-0'}`}>
+          <div
+            className={`space-y-6 ${isVisible ? "form-entrance" : "opacity-0"}`}
+          >
             {/* Email Field */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-slate-700">
@@ -264,15 +310,17 @@ const LoginForm = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   className={`input-focus w-full pl-12 pr-4 py-4 border-2 rounded-2xl bg-slate-50/50 transition-all duration-300 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 ${
-                    errors.email 
-                      ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-100' 
-                      : 'border-slate-200 hover:border-slate-300'
+                    errors.email
+                      ? "border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-100"
+                      : "border-slate-200 hover:border-slate-300"
                   }`}
                   placeholder="Enter your email address"
                 />
               </div>
               {errors.email && (
-                <p className="text-red-500 text-sm font-medium">{errors.email}</p>
+                <p className="text-red-500 text-sm font-medium">
+                  {errors.email}
+                </p>
               )}
             </div>
 
@@ -284,14 +332,14 @@ const LoginForm = () => {
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5 group-focus-within:text-blue-500 transition-colors" />
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
                   className={`input-focus w-full pl-12 pr-14 py-4 border-2 rounded-2xl bg-slate-50/50 transition-all duration-300 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 ${
-                    errors.password 
-                      ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-100' 
-                      : 'border-slate-200 hover:border-slate-300'
+                    errors.password
+                      ? "border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-100"
+                      : "border-slate-200 hover:border-slate-300"
                   }`}
                   placeholder="Enter your password"
                 />
@@ -300,11 +348,17 @@ const LoginForm = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-red-500 text-sm font-medium">{errors.password}</p>
+                <p className="text-red-500 text-sm font-medium">
+                  {errors.password}
+                </p>
               )}
             </div>
 
@@ -339,17 +393,24 @@ const LoginForm = () => {
           </div>
 
           {/* Footer Links */}
-          <div className={`mt-8 space-y-4 ${isVisible ? 'links-entrance' : 'opacity-0'}`}>
+          <div
+            className={`mt-8 space-y-4 ${
+              isVisible ? "links-entrance" : "opacity-0"
+            }`}
+          >
             <div className="text-center">
               <button className="text-sm text-blue-600 hover:text-blue-800 font-medium hover:underline transition-all duration-200 px-2 py-1 rounded-lg hover:bg-blue-50">
                 Forgot your password?
               </button>
             </div>
-            
+
             <div className="text-center">
               <p className="text-sm text-slate-600">
-                Don't have an account?{' '}
-                <button className="text-blue-600 hover:text-blue-800 font-semibold hover:underline transition-all duration-200 px-1 py-0.5 rounded hover:bg-blue-50">
+                Don't have an account?{" "}
+                <button
+                  onClick={() => navigate("/register")}
+                  className="text-blue-600 hover:text-blue-800 font-semibold hover:underline transition-all duration-200 px-1 py-0.5 rounded hover:bg-blue-50"
+                >
                   Sign up now
                 </button>
               </p>

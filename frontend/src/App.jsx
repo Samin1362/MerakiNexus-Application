@@ -26,11 +26,19 @@ import ArtistUpload from "./pages/ArtistUpload";
 import ArtistEarnings from "./pages/ArtistEarnings";
 import ArtistSettings from "./pages/ArtistSettings";
 
+// ✅ Authentication & Protection
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute, {
+  AdminRoute,
+  ArtistRoute,
+} from "./components/ProtectedRoute";
+
 import ScrollToTop from "./components/ScrollToTop";
+import RegistrationForm from "./pages/RegistrationForm";
 
 function App() {
   return (
-    <>e
+    <AuthProvider>
       <Navbar />
       <ScrollToTop />
       <Routes>
@@ -41,10 +49,18 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/chatbot" element={<ChatbotApp />} />
         <Route path="/login" element={<LoginForm />} />
+        <Route path="/register" element={<RegistrationForm />} />
         <Route path="*" element={<NotFound />} />
 
-        {/* 🛠️ Admin Dashboard Routes */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
+        {/* 🛠️ Admin Dashboard Routes - Protected */}
+        <Route
+          path="/dashboard"
+          element={
+            <AdminRoute>
+              <DashboardLayout />
+            </AdminRoute>
+          }
+        >
           <Route index element={<DashboardHome />} /> {/* /dashboard */}
           <Route path="users" element={<div>Users Management</div>} />
           <Route path="artworks" element={<DashboardArtworks />} />
@@ -53,8 +69,15 @@ function App() {
           <Route path="settings" element={<DashboardSettings />} />
         </Route>
 
-        {/* 🎨 Artist Dashboard Routes */}
-        <Route path="/artist-dashboard" element={<ArtistDashboardLayout />}>
+        {/* 🎨 Artist Dashboard Routes - Protected */}
+        <Route
+          path="/artist-dashboard"
+          element={
+            <ArtistRoute>
+              <ArtistDashboardLayout />
+            </ArtistRoute>
+          }
+        >
           <Route index element={<ArtistHome />} /> {/* /artist-dashboard */}
           <Route path="my-artworks" element={<ArtistMyArtworks />} />
           <Route path="upload" element={<ArtistUpload />} />
@@ -63,7 +86,7 @@ function App() {
         </Route>
       </Routes>
       <Footer />
-    </>
+    </AuthProvider>
   );
 }
 

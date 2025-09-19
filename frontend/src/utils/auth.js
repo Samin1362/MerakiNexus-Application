@@ -1,4 +1,5 @@
 // JWT Token utilities for MerakiNexus Authentication
+import Cookies from "js-cookie";
 
 /**
  * Decode JWT token without verification (for client-side role extraction)
@@ -26,15 +27,26 @@ export const decodeJWT = (token) => {
 };
 
 /**
- * Store authentication tokens in localStorage
+ * Store authentication tokens in cookies
  * @param {string} accessToken - Access token
  * @param {string} refreshToken - Refresh token (optional)
  */
 export const storeTokens = (accessToken, refreshToken = null) => {
   try {
-    localStorage.setItem("merakiNexus_accessToken", accessToken);
+    // Store access token with 7 days expiry
+    Cookies.set("merakiNexus_accessToken", accessToken, {
+      expires: 7,
+      secure: true,
+      sameSite: "strict",
+    });
+
     if (refreshToken) {
-      localStorage.setItem("merakiNexus_refreshToken", refreshToken);
+      // Store refresh token with 30 days expiry
+      Cookies.set("merakiNexus_refreshToken", refreshToken, {
+        expires: 30,
+        secure: true,
+        sameSite: "strict",
+      });
     }
   } catch (error) {
     console.error("Error storing tokens:", error);
@@ -42,12 +54,12 @@ export const storeTokens = (accessToken, refreshToken = null) => {
 };
 
 /**
- * Get access token from localStorage
+ * Get access token from cookies
  * @returns {string|null} - Access token or null
  */
 export const getAccessToken = () => {
   try {
-    return localStorage.getItem("merakiNexus_accessToken");
+    return Cookies.get("merakiNexus_accessToken") || null;
   } catch (error) {
     console.error("Error getting access token:", error);
     return null;
@@ -55,12 +67,12 @@ export const getAccessToken = () => {
 };
 
 /**
- * Get refresh token from localStorage
+ * Get refresh token from cookies
  * @returns {string|null} - Refresh token or null
  */
 export const getRefreshToken = () => {
   try {
-    return localStorage.getItem("merakiNexus_refreshToken");
+    return Cookies.get("merakiNexus_refreshToken") || null;
   } catch (error) {
     console.error("Error getting refresh token:", error);
     return null;
@@ -68,12 +80,12 @@ export const getRefreshToken = () => {
 };
 
 /**
- * Remove all authentication tokens from localStorage
+ * Remove all authentication tokens from cookies
  */
 export const clearTokens = () => {
   try {
-    localStorage.removeItem("merakiNexus_accessToken");
-    localStorage.removeItem("merakiNexus_refreshToken");
+    Cookies.remove("merakiNexus_accessToken");
+    Cookies.remove("merakiNexus_refreshToken");
   } catch (error) {
     console.error("Error clearing tokens:", error);
   }

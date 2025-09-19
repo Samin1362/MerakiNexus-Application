@@ -15,7 +15,7 @@ import {
 // ✅ Import your Artist Dashboard pages
 import ArtistMyArtworks from "../pages/ArtistMyArtworks";
 import ArtistUpload from "../pages/ArtistUpload";
-import ArtistInsights from "../pages/ArtistInsights";
+import ArtistEarnings from "../pages/ArtistEarnings";
 import ArtistSettings from "../pages/ArtistSettings";
 import ArtistHome from "../pages/ArtistHome";
 
@@ -25,10 +25,18 @@ const ArtistDashboardLayout = () => {
 
   const navigationItems = [
     { path: "/artist-dashboard", label: "Overview", icon: LayoutDashboard },
-    { path: "/artist/my-artworks", label: "My Artworks", icon: FolderOpen },
-    { path: "/artist/upload", label: "Upload Artwork", icon: ImagePlus },
-    { path: "/artist/insights", label: "Insights", icon: BarChart },
-    { path: "/artist/settings", label: "Settings", icon: Settings },
+    {
+      path: "/artist-dashboard/my-artworks",
+      label: "My Artworks",
+      icon: FolderOpen,
+    },
+    {
+      path: "/artist-dashboard/upload",
+      label: "Upload Artwork",
+      icon: ImagePlus,
+    },
+    { path: "/artist-dashboard/earnings", label: "Earnings", icon: BarChart },
+    { path: "/artist-dashboard/settings", label: "Settings", icon: Settings },
   ];
 
   const isActiveRoute = (path) => {
@@ -181,10 +189,12 @@ const ArtistDashboardLayout = () => {
         <main className="flex-1 overflow-auto">
           <div className="p-6">
             {activeRoute === "/artist-dashboard" && <ArtistHome />}
-            {activeRoute === "/artist/my-artworks" && <ArtistMyArtworks />}
-            {activeRoute === "/artist/upload" && <ArtistUpload />}
-            {activeRoute === "/artist/insights" && <ArtistInsights />}
-            {activeRoute === "/artist/settings" && <ArtistSettings />}
+            {activeRoute === "/artist-dashboard/my-artworks" && (
+              <ArtistMyArtworks />
+            )}
+            {activeRoute === "/artist-dashboard/upload" && <ArtistUpload />}
+            {activeRoute === "/artist-dashboard/earnings" && <ArtistEarnings />}
+            {activeRoute === "/artist-dashboard/settings" && <ArtistSettings />}
           </div>
         </main>
       </div>

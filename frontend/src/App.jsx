@@ -27,10 +27,11 @@ import ArtistEarnings from "./pages/ArtistEarnings";
 import ArtistSettings from "./pages/ArtistSettings";
 
 import ScrollToTop from "./components/ScrollToTop";
+import RegistrationForm from "./pages/RegistrationForm";
 
 function App() {
   return (
-    <>e
+    <>
       <Navbar />
       <ScrollToTop />
       <Routes>
@@ -41,6 +42,7 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/chatbot" element={<ChatbotApp />} />
         <Route path="/login" element={<LoginForm />} />
+        <Route path="/register" element={<RegistrationForm />} />
         <Route path="*" element={<NotFound />} />
 
         {/* 🛠️ Admin Dashboard Routes */}

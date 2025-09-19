@@ -15,6 +15,9 @@ const RegistrationForm = () => {
 
   const [errors, setErrors] = useState({});
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiError, setApiError] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -74,12 +77,66 @@ const RegistrationForm = () => {
         [name]: "",
       }));
     }
+
+    // Clear API error when user starts typing
+    if (apiError) {
+      setApiError("");
+    }
   };
 
-  const handleSubmit = () => {
-    if (validateForm()) {
-      console.log("Form Data:", JSON.stringify(formData, null, 2));
-      alert("Registration successful! Check the console for form data.");
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setApiError("");
+
+    try {
+      const response = await fetch(
+        "https://meraki-nexus-api.vercel.app/meraki-nexus-api/user",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phone: formData.phone,
+            password: formData.password,
+            role: formData.role,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success === true) {
+        console.log("Registration successful:", data);
+        setShowSuccessModal(true);
+
+        // Redirect to login after showing success message
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      } else {
+        // Handle specific error cases
+        if (
+          data.message &&
+          data.message.toLowerCase().includes("already exists")
+        ) {
+          setApiError("User already registered with this email address.");
+        } else {
+          setApiError(data.message || "Registration failed. Please try again.");
+        }
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      setApiError("Unable to connect to server. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -256,11 +313,30 @@ const RegistrationForm = () => {
             >
               <button
                 onClick={handleSubmit}
-                className="w-full py-3 px-6 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-semibold rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-purple-500/25 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-transparent active:scale-95"
+                disabled={isSubmitting}
+                className="w-full py-3 px-6 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-semibold rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-purple-500/25 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-transparent active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
               >
-                Create Account
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
+                    Creating Account...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
               </button>
             </div>
+
+            {/* API Error Display */}
+            {apiError && (
+              <div className="mt-4 animate-in slide-in-from-top duration-300">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-600 text-sm font-medium text-center">
+                    {apiError}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="text-center mt-6">
@@ -276,6 +352,48 @@ const RegistrationForm = () => {
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 transform animate-in zoom-in-95 duration-300">
+            <div className="text-center">
+              {/* Success Icon */}
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+
+              {/* Success Message */}
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Account Created Successfully!
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Welcome to MerakiNexus! You can now sign in with your new
+                account.
+              </p>
+
+              {/* Loading indicator for redirect */}
+              <div className="flex items-center justify-center text-sm text-gray-500">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-500 border-t-transparent mr-2"></div>
+                Redirecting to login page...
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,9 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { getRoleBasedRedirectPath } from "../utils/auth";
 
 const LoginForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
 
   // State management
   const [formData, setFormData] = useState({
@@ -107,7 +111,7 @@ const LoginForm = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:3000/meraki-nexus-api/user/login",
+        "https://meraki-nexus-api.vercel.app/meraki-nexus-api/user/login",
         {
           method: "POST",
           headers: {
@@ -124,10 +128,26 @@ const LoginForm = () => {
 
       if (data.success === true) {
         console.log("Login successful");
+
+        // Store tokens and update auth context
+        const { accessToken, refreshToken } = data.data;
+        login(accessToken, refreshToken);
+
+        // Trigger success animation
         triggerSuccessAnimation();
+
+        // Get user role from token and redirect accordingly
+        const userRole = JSON.parse(atob(accessToken.split(".")[1])).role;
+        const redirectPath =
+          location.state?.from?.pathname || getRoleBasedRedirectPath(userRole);
+
+        // Delay navigation to show success animation
+        setTimeout(() => {
+          navigate(redirectPath, { replace: true });
+        }, 800);
       } else {
         // Login failed - show error message and shake animation
-        setApiError("Invalid email or password");
+        setApiError(data.message || "Invalid email or password");
         triggerShakeAnimation();
       }
     } catch (error) {

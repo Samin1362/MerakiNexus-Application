@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { LogOut, User } from "lucide-react";
 
 function Navbar() {
   const brandRef = useRef(null);
@@ -9,6 +11,8 @@ function Navbar() {
   const mobileMenuRef = useRef(null);
   const underlineRefs = useRef([]);
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+  const { isAuthenticated, role, logout } = useAuth();
 
   useEffect(() => {
     const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -92,15 +96,40 @@ function Navbar() {
 
   const toggleMenu = () => setIsOpen((prev) => !prev);
 
-  const links = [
-    { label: "Home", to: "/" },
-    { label: "Art Gallery", to: "/gallery" },
-    { label: "Upload Artwork", to: "/upload" },
-    { label: "About", to: "/about" },
-    { label: "Chatbot", to: "/chatbot"},
-    { label: "Admin DashBoard", to: "/dashboard"},
-    { label: "Artist DashBoard", to: "/artist-dashboard"}
-  ];
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+    setIsOpen(false);
+  };
+
+  // Dynamic links based on user role
+  const getNavigationLinks = () => {
+    const baseLinks = [
+      { label: "Home", to: "/" },
+      { label: "Art Gallery", to: "/gallery" },
+      { label: "Upload Artwork", to: "/upload" },
+      { label: "About", to: "/about" },
+      { label: "Chatbot", to: "/chatbot" },
+    ];
+
+    if (isAuthenticated) {
+      if (role === "Admin") {
+        baseLinks.push({ label: "Admin Dashboard", to: "/dashboard" });
+      } else if (role === "Artist") {
+        baseLinks.push({ label: "Artist Dashboard", to: "/artist-dashboard" });
+      }
+    } else {
+      // Show dashboard links for non-authenticated users (they'll be redirected to login)
+      baseLinks.push(
+        { label: "Admin Dashboard", to: "/dashboard" },
+        { label: "Artist Dashboard", to: "/artist-dashboard" }
+      );
+    }
+
+    return baseLinks;
+  };
+
+  const links = getNavigationLinks();
 
   return (
     <nav className="relative md:fixed md:top-0 md:left-0 md:right-0 z-50 backdrop-blur bg-white/60 border-b border-black/5">
@@ -132,12 +161,28 @@ function Navbar() {
               </Link>
             ))}
 
-            <Link
-              to="/login"
-              className="rounded-full bg-gray-900 text-white text-sm px-4 py-2 shadow-sm hover:shadow-md transition-shadow"
-            >
-              Login
-            </Link>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <User className="w-4 h-4" />
+                  <span className="font-medium">{role}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 rounded-full bg-red-600 text-white text-sm px-4 py-2 shadow-sm hover:shadow-md hover:bg-red-700 transition-all duration-200"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="rounded-full bg-gray-900 text-white text-sm px-4 py-2 shadow-sm hover:shadow-md transition-shadow"
+              >
+                Login
+              </Link>
+            )}
           </div>
 
           <button
@@ -183,12 +228,28 @@ function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link
-            to="/login"
-            className="mt-2 block rounded-md bg-gray-900 text-white text-center px-3 py-2 text-base font-medium"
-          >
-            Login
-          </Link>
+          {isAuthenticated ? (
+            <div className="mt-2 space-y-2">
+              <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-gray-50 rounded-md">
+                <User className="w-4 h-4" />
+                <span className="font-medium">Logged in as {role}</span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 rounded-md bg-red-600 text-white px-3 py-2 text-base font-medium hover:bg-red-700 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="mt-2 block rounded-md bg-gray-900 text-white text-center px-3 py-2 text-base font-medium"
+            >
+              Login
+            </Link>
+          )}
         </div>
       </div>
     </nav>

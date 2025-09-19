@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   ImagePlus,
@@ -12,16 +13,9 @@ import {
   Search,
 } from "lucide-react";
 
-// ✅ Import your Artist Dashboard pages
-import ArtistMyArtworks from "../pages/ArtistMyArtworks";
-import ArtistUpload from "../pages/ArtistUpload";
-import ArtistEarnings from "../pages/ArtistEarnings";
-import ArtistSettings from "../pages/ArtistSettings";
-import ArtistHome from "../pages/ArtistHome";
-
 const ArtistDashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeRoute, setActiveRoute] = useState("/artist-dashboard");
+  const location = useLocation();
 
   const navigationItems = [
     { path: "/artist-dashboard", label: "Overview", icon: LayoutDashboard },
@@ -41,13 +35,12 @@ const ArtistDashboardLayout = () => {
 
   const isActiveRoute = (path) => {
     if (path === "/artist-dashboard") {
-      return activeRoute === "/artist-dashboard";
+      return location.pathname === "/artist-dashboard";
     }
-    return activeRoute.startsWith(path);
+    return location.pathname.startsWith(path);
   };
 
-  const handleNavClick = (path) => {
-    setActiveRoute(path);
+  const handleNavClick = () => {
     setIsSidebarOpen(false);
   };
 
@@ -56,8 +49,9 @@ const ArtistDashboardLayout = () => {
     const isActive = isActiveRoute(item.path);
 
     return (
-      <button
-        onClick={() => handleNavClick(item.path)}
+      <Link
+        to={item.path}
+        onClick={handleNavClick}
         className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 group ${
           isActive
             ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
@@ -71,7 +65,7 @@ const ArtistDashboardLayout = () => {
           } transition-colors duration-300`}
         />
         <span className="font-medium">{item.label}</span>
-      </button>
+      </Link>
     );
   };
 
@@ -188,13 +182,7 @@ const ArtistDashboardLayout = () => {
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
           <div className="p-6">
-            {activeRoute === "/artist-dashboard" && <ArtistHome />}
-            {activeRoute === "/artist-dashboard/my-artworks" && (
-              <ArtistMyArtworks />
-            )}
-            {activeRoute === "/artist-dashboard/upload" && <ArtistUpload />}
-            {activeRoute === "/artist-dashboard/earnings" && <ArtistEarnings />}
-            {activeRoute === "/artist-dashboard/settings" && <ArtistSettings />}
+            <Outlet />
           </div>
         </main>
       </div>

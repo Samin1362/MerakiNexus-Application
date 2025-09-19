@@ -100,6 +100,8 @@ const LoginForm = () => {
   };
 
   // Handle form submission
+  // In your LoginForm.jsx, update the handleSubmit function:
+
   const handleSubmit = async () => {
     if (!validateForm()) {
       triggerShakeAnimation();
@@ -128,10 +130,28 @@ const LoginForm = () => {
 
       if (data.success === true) {
         console.log("Login successful");
+        console.log("🔍 DEBUG - Full login response:", data);
+        console.log("🔍 DEBUG - User data from API:", data.data.user);
+        console.log("🔍 DEBUG - User ID:", data.data.user._id);
 
-        // Store tokens and update auth context
-        const { accessToken, refreshToken } = data.data;
-        login(accessToken, refreshToken);
+        // Store tokens and user data in auth context
+        const { accessToken, refreshToken, user } = data.data;
+
+        // Normalize user data - map _id to id
+        const normalizedUser = {
+          id: user._id, // ✅ Map _id to id
+          _id: user._id, // ✅ Keep original _id as backup
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+        };
+
+        console.log("🔍 DEBUG - Normalized user data:", normalizedUser);
+
+        // Pass all three parameters to login function
+        login(accessToken, refreshToken, normalizedUser);
 
         // Trigger success animation
         triggerSuccessAnimation();

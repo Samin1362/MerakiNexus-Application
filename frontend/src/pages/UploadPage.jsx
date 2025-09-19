@@ -1,19 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
+import { getAccessToken } from "../utils/auth";
+import { useAuth } from "../contexts/AuthContext";
 
 function UploadPage() {
   const rootRef = useRef(null);
   const formRef = useRef(null);
   const fieldsRef = useRef([]);
   const submitRef = useRef(null);
+  const { isAuthenticated, user } = useAuth();
 
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
   const [year, setYear] = useState("");
   const [medium, setMedium] = useState("");
   const [tags, setTags] = useState("");
-  const [imageFile, setImageFile] = useState(null);
+  const [classificationPercentage, setClassificationPercentage] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [imagePreview, setImagePreview] = useState("");
+  const [imageError, setImageError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [showSuccess, setShowSuccess] = useState(false);
   const successRef = useRef(null);
@@ -44,58 +50,162 @@ function UploadPage() {
     return () => ctx.revert();
   }, []);
 
-  const onImageChange = (e) => {
-    const file = e.target.files?.[0];
-    setImageFile(file || null);
-    if (file) {
-      const url = URL.createObjectURL(file);
+  const onImageUrlChange = (e) => {
+    const url = e.target.value;
+    setImageUrl(url);
+    setImageError(false);
+
+    // Update preview if URL appears to be valid
+    if (url && (url.startsWith("http") || url.startsWith("https"))) {
       setImagePreview(url);
     } else {
       setImagePreview("");
     }
   };
 
-  const onSubmit = (e) => {
-    e.preventDefault();
+  const handleImageError = () => {
+    setImageError(true);
+    setImagePreview("");
+  };
 
-    // Basic validation
-    if (!title || !artist || !year || !medium || !tags || !imageFile) {
-      alert("Please fill in all fields and upload an image.");
+  const handleImageLoad = () => {
+    setImageError(false);
+  };
+
+  
+  const onSubmit = async (e) => {
+    e.preventDefault();
+  
+    console.log("🚀 UPLOAD STARTED - Debug Information:");
+    console.log("📊 isAuthenticated:", isAuthenticated);
+    console.log("👤 user from AuthContext:", user);
+  
+    if (!isAuthenticated) {
+      alert("You must be logged in to upload artwork. Please login first.");
       return;
     }
-
-    // Simulate AI processing by logging
-    const payload = {
-      title,
-      artist,
-      created_year: year,
-      medium,
-      tags: tags
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean),
-      imageFileName: imageFile?.name,
-    };
-    console.log("Submitted artwork:", payload);
-
-    // Success animation modal
-    setShowSuccess(true);
-    requestAnimationFrame(() => {
-      const tl = gsap.timeline();
-      tl.set(overlayRef.current, { pointerEvents: "auto" })
-        .fromTo(
-          overlayRef.current,
-          { opacity: 0 },
-          { opacity: 1, duration: 0.2, ease: "power2.out" }
-        )
-        .fromTo(
-          successRef.current,
-          { opacity: 0, scale: 0.96, y: 8 },
-          { opacity: 1, scale: 1, y: 0, duration: 0.25, ease: "power3.out" },
-          "<"
-        );
-    });
+  
+    // Basic validation
+    if (
+      !title ||
+      !artist ||
+      !year ||
+      !medium ||
+      !tags ||
+      !imageUrl ||
+      !classificationPercentage
+    ) {
+      alert("Please fill in all fields including classification percentage and provide an image URL.");
+      return;
+    }
+  
+    setIsSubmitting(true);
+  
+    try {
+      // Get access token from cookies
+      const accessToken = getAccessToken();
+  
+      console.log("🔑 Raw Access Token from cookies:", accessToken);
+  
+      if (!accessToken) {
+        alert("Authentication token not found. Please login again.");
+        setIsSubmitting(false);
+        return;
+      }
+  
+      // Normalize Bearer prefix
+      const authToken = accessToken.replace(/^Bearer\s+/i, "");
+  
+      console.log("✅ Authorization Token (final):", authToken);
+  
+      // Construct payload
+      let finalUserId = user?.id || user?._id || "68ccd9d5135eaf14c9360e0e";
+  
+      const payload = {
+        title,
+        artist,
+        image_url: imageUrl,
+        classification: "Manual Upload",
+        classification_percentage: parseFloat(classificationPercentage),
+        scores: {
+          aesthetic_score: 0.0,
+          sentiment_score: 0.0,
+          memorability_score: 0.0,
+          art_evaluation_score: 0.0,
+        },
+        art_value_usd: 0,
+        created_year: year,
+        medium,
+        tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+        user: finalUserId,
+      };
+  
+      console.log("📤 Payload being sent:", payload);
+      console.log("check: ", authToken);
+  
+      // Make API request
+      const response = await fetch(
+        "https://meraki-nexus-api.vercel.app/meraki-nexus-api/nexus/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: authToken,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+  
+      const data = await response.json();
+  
+      console.log("📥 API Response JSON:", data);
+      console.log("📥 Response status:", response.status);
+      console.log("📥 Response headers:", Object.fromEntries(response.headers.entries()));
+  
+      if (response.ok && data.success === true && data.statusCode === 201) {
+        console.log("✅ Artwork created successfully!");
+        console.log("🎨 Artwork ID:", data.data._id);
+  
+        setShowSuccess(true);
+        requestAnimationFrame(() => {
+          const tl = gsap.timeline();
+          tl.set(overlayRef.current, { pointerEvents: "auto" })
+            .fromTo(
+              overlayRef.current,
+              { opacity: 0 },
+              { opacity: 1, duration: 0.2, ease: "power2.out" }
+            )
+            .fromTo(
+              successRef.current,
+              { opacity: 0, scale: 0.96, y: 8 },
+              { opacity: 1, scale: 1, y: 0, duration: 0.25, ease: "power3.out" },
+              "<"
+            );
+        });
+      } else {
+        console.error("❌ API Error Response:", data);
+  
+        if (response.status === 401) {
+          console.error("❌ 401 Unauthorized - Token is invalid or expired");
+          alert("Your session is invalid or expired. Please login again.");
+        } else if (response.status === 403) {
+          console.error("❌ 403 Forbidden - Insufficient permissions");
+          alert("You don't have permission to upload artwork.");
+        } else if (data.message?.includes("invalid token")) {
+          console.error("❌ Invalid token error");
+          alert("Authentication token is invalid. Please login again.");
+        } else {
+          alert(`Failed to submit artwork: ${data.message || "Unknown error"}`);
+        }
+      }
+    } catch (error) {
+      console.error("❌ Network/API Error:", error);
+      alert("Unable to connect to server. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+  
 
   const closeSuccess = () => {
     const tl = gsap.timeline({
@@ -142,7 +252,19 @@ function UploadPage() {
               src={imagePreview}
               alt="Preview"
               className="w-full object-cover"
+              onError={handleImageError}
+              onLoad={handleImageLoad}
             />
+          </div>
+        )}
+
+        {/* Image Error Message */}
+        {imageError && (
+          <div className="mb-6 rounded-xl bg-red-500/20 border border-red-500/30 p-4 text-center">
+            <p className="text-red-200 text-sm">
+              Unable to load image from the provided URL. Please check the URL
+              and try again.
+            </p>
           </div>
         )}
 
@@ -235,13 +357,31 @@ function UploadPage() {
 
             <div ref={(el) => (fieldsRef.current[5] = el)}>
               <label className="mb-1 block text-sm text-white/80">
-                Image Upload
+                Classification Percentage
               </label>
               <input
-                type="file"
-                accept="image/*"
-                onChange={onImageChange}
-                className="w-full rounded-lg border border-white/20 bg-white/10 file:mr-4 file:rounded-md file:border-0 file:bg-white/20 file:px-3 file:py-2 file:text-white file:hover:bg-white/30 focus:border-white/40"
+                type="number"
+                value={classificationPercentage}
+                onChange={(e) => setClassificationPercentage(e.target.value)}
+                className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 outline-none placeholder-white/60 focus:border-white/40 focus:bg-white/15"
+                placeholder="85.5"
+                min="0"
+                max="100"
+                step="0.1"
+                required
+              />
+            </div>
+
+            <div ref={(el) => (fieldsRef.current[6] = el)}>
+              <label className="mb-1 block text-sm text-white/80">
+                Image URL
+              </label>
+              <input
+                type="url"
+                value={imageUrl}
+                onChange={onImageUrlChange}
+                className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 outline-none placeholder-white/60 focus:border-white/40 focus:bg-white/15"
+                placeholder="https://example.com/your-image.jpg"
                 required
               />
             </div>
@@ -250,9 +390,21 @@ function UploadPage() {
               <button
                 ref={submitRef}
                 type="submit"
-                className="w-full rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 px-6 py-3 text-lg font-semibold text-white shadow-lg shadow-indigo-900/30 transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-white/40"
+                disabled={isSubmitting}
+                className={`w-full rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 px-6 py-3 text-lg font-semibold text-white shadow-lg shadow-indigo-900/30 transition-transform focus:outline-none focus:ring-2 focus:ring-white/40 ${
+                  isSubmitting
+                    ? "opacity-70 cursor-not-allowed"
+                    : "hover:scale-[1.02]"
+                }`}
               >
-                Submit Artwork
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
+                    Submitting...
+                  </div>
+                ) : (
+                  "Submit Artwork"
+                )}
               </button>
             </div>
           </div>

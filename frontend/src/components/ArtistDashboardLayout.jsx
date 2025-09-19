@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import {
   LayoutDashboard,
   ImagePlus,
@@ -16,6 +17,34 @@ import {
 const ArtistDashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  // Get user display data with fallbacks
+  const getDisplayName = () => {
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    return "Guest User";
+  };
+
+  const getDisplayEmail = () => {
+    return user?.email || "guest@merakinexus.com";
+  };
+
+  const getInitials = () => {
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName.charAt(0)}${user.lastName.charAt(
+        0
+      )}`.toUpperCase();
+    }
+    return "GU";
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   const navigationItems = [
     { path: "/artist-dashboard", label: "Overview", icon: LayoutDashboard },
@@ -123,14 +152,21 @@ const ArtistDashboardLayout = () => {
           <div className="p-4 border-t border-gray-100">
             <div className="flex items-center space-x-3 p-3 rounded-xl bg-gradient-to-r from-gray-50 to-blue-50">
               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-medium text-sm">AR</span>
+                <span className="text-white font-medium text-sm">
+                  {getInitials()}
+                </span>
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">Artist User</p>
-                <p className="text-xs text-gray-500">artist@merakinexus.com</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {getDisplayName()}
+                </p>
+                <p className="text-xs text-gray-500">{getDisplayEmail()}</p>
               </div>
             </div>
-            <button className="w-full mt-3 flex items-center justify-center space-x-2 px-4 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
+            <button
+              onClick={handleLogout}
+              className="w-full mt-3 flex items-center justify-center space-x-2 px-4 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+            >
               <LogOut size={16} />
               <span className="text-sm font-medium">Sign Out</span>
             </button>
@@ -173,7 +209,9 @@ const ArtistDashboardLayout = () => {
 
               {/* Profile */}
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-medium text-sm">AR</span>
+                <span className="text-white font-medium text-sm">
+                  {getInitials()}
+                </span>
               </div>
             </div>
           </div>

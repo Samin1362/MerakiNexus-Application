@@ -27,11 +27,16 @@ export const decodeJWT = (token) => {
 };
 
 /**
- * Store authentication tokens in cookies
+ * Store authentication tokens in cookies and user data in localStorage
  * @param {string} accessToken - Access token
  * @param {string} refreshToken - Refresh token (optional)
+ * @param {object} userData - User data (optional)
  */
-export const storeTokens = (accessToken, refreshToken = null) => {
+export const storeTokens = (
+  accessToken,
+  refreshToken = null,
+  userData = null
+) => {
   try {
     // Store access token with 7 days expiry
     Cookies.set("merakiNexus_accessToken", accessToken, {
@@ -47,6 +52,11 @@ export const storeTokens = (accessToken, refreshToken = null) => {
         secure: true,
         sameSite: "strict",
       });
+    }
+
+    // Store user data in localStorage if provided
+    if (userData) {
+      localStorage.setItem("merakiNexus_userData", JSON.stringify(userData));
     }
   } catch (error) {
     console.error("Error storing tokens:", error);
@@ -80,12 +90,13 @@ export const getRefreshToken = () => {
 };
 
 /**
- * Remove all authentication tokens from cookies
+ * Remove all authentication tokens from cookies and user data from localStorage
  */
 export const clearTokens = () => {
   try {
     Cookies.remove("merakiNexus_accessToken");
     Cookies.remove("merakiNexus_refreshToken");
+    localStorage.removeItem("merakiNexus_userData");
   } catch (error) {
     console.error("Error clearing tokens:", error);
   }
@@ -134,6 +145,20 @@ export const getUserInfo = () => {
 
   const decoded = decodeJWT(token);
   return decoded || null;
+};
+
+/**
+ * Get stored user data from localStorage
+ * @returns {object|null} - User data or null
+ */
+export const getStoredUserData = () => {
+  try {
+    const userData = localStorage.getItem("merakiNexus_userData");
+    return userData ? JSON.parse(userData) : null;
+  } catch (error) {
+    console.error("Error getting stored user data:", error);
+    return null;
+  }
 };
 
 /**

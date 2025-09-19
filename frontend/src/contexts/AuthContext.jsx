@@ -5,6 +5,7 @@ import {
   getUserInfo,
   clearTokens,
   storeTokens,
+  getStoredUserData,
 } from "../utils/auth";
 
 const AuthContext = createContext();
@@ -27,9 +28,13 @@ export const AuthProvider = ({ children }) => {
     const initializeAuth = () => {
       try {
         if (isAuthenticated()) {
+          // First try to get stored user data, fallback to JWT data
+          const storedUserData = getStoredUserData();
           const userInfo = getUserInfo();
           const userRole = getUserRole();
-          setUser(userInfo);
+
+          // Use stored user data if available, otherwise fallback to JWT
+          setUser(storedUserData || userInfo);
           setRole(userRole);
         } else {
           setUser(null);
@@ -51,13 +56,21 @@ export const AuthProvider = ({ children }) => {
    * Login user with tokens
    * @param {string} accessToken - Access token
    * @param {string} refreshToken - Refresh token
+   * @param {object} userData - User data (optional)
    */
-  const login = (accessToken, refreshToken) => {
+  const login = (accessToken, refreshToken, userData = null) => {
     try {
-      storeTokens(accessToken, refreshToken);
-      const userInfo = getUserInfo();
+      storeTokens(accessToken, refreshToken, userData);
       const userRole = getUserRole();
-      setUser(userInfo);
+
+      // Use provided user data if available, otherwise get from JWT
+      if (userData) {
+        setUser(userData);
+      } else {
+        const userInfo = getUserInfo();
+        setUser(userInfo);
+      }
+
       setRole(userRole);
     } catch (error) {
       console.error("Error during login:", error);

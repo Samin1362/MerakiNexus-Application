@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { LogOut, User } from "lucide-react";
+import { User } from "lucide-react";
+import LogoutButton from "./LogoutButton";
 
 function Navbar() {
   const brandRef = useRef(null);
@@ -12,7 +13,7 @@ function Navbar() {
   const underlineRefs = useRef([]);
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-  const { isAuthenticated, role, logout } = useAuth();
+  const { isAuthenticated, role } = useAuth();
 
   useEffect(() => {
     const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -96,12 +97,6 @@ function Navbar() {
 
   const toggleMenu = () => setIsOpen((prev) => !prev);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-    setIsOpen(false);
-  };
-
   // Dynamic links based on user role
   const getNavigationLinks = () => {
     const baseLinks = [
@@ -167,13 +162,12 @@ function Navbar() {
                   <User className="w-4 h-4" />
                   <span className="font-medium">{role}</span>
                 </div>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 rounded-full bg-red-600 text-white text-sm px-4 py-2 shadow-sm hover:shadow-md hover:bg-red-700 transition-all duration-200"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </button>
+                <LogoutButton
+                  variant="default"
+                  className="text-sm px-4 py-2"
+                  showIcon={true}
+                  showText={false}
+                />
               </div>
             ) : (
               <Link
@@ -234,13 +228,12 @@ function Navbar() {
                 <User className="w-4 h-4" />
                 <span className="font-medium">Logged in as {role}</span>
               </div>
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center justify-center gap-2 rounded-md bg-red-600 text-white px-3 py-2 text-base font-medium hover:bg-red-700 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </button>
+              <LogoutButton
+                variant="default"
+                className="w-full text-base"
+                showIcon={true}
+                showText={true}
+              />
             </div>
           ) : (
             <Link

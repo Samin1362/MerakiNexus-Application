@@ -306,7 +306,7 @@ function AboutPage() {
             {/* Hero visual: local image placeholder */}
             <div className="relative mt-10 lg:mt-0">
               <img
-                src="https://i.postimg.cc/6qsJFhZh/temp-Imagej0by-Qj.avif"
+                src="https://i.postimg.cc/Z5CMrM0D/temp-Image-ABECt9.avif"
                 alt="Abstract AI art composition"
                 loading="lazy"
                 className="w-full rounded-2xl border border-white/10 bg-white/5 object-cover shadow-2xl"

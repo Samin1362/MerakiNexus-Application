@@ -8,6 +8,9 @@ function AboutPage() {
   // Reduced motion preference
   const [reduceMotion, setReduceMotion] = useState(false);
 
+  // Gallery artworks state
+  const [galleryArtworks, setGalleryArtworks] = useState([]);
+
   // Page refs
   const rootRef = useRef(null);
   const heroRef = useRef(null);
@@ -213,6 +216,28 @@ function AboutPage() {
     return () => ctx.revert();
   }, [reduceMotion]);
 
+  // Fetch gallery artworks data
+  useEffect(() => {
+    const fetchGalleryData = async () => {
+      try {
+        const response = await fetch("/art-data.json");
+        const data = await response.json();
+        // Get first 6 artworks for preview
+        const artworks = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.artworks)
+          ? data.artworks
+          : [];
+        setGalleryArtworks(artworks.slice(0, 6));
+      } catch (error) {
+        console.error("Error fetching gallery data:", error);
+        setGalleryArtworks([]);
+      }
+    };
+
+    fetchGalleryData();
+  }, []);
+
   // Helpers: focus ring classes
   const focusRing =
     "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent focus:ring-white/70";
@@ -228,7 +253,7 @@ function AboutPage() {
         <svg
           className="pointer-events-none absolute -top-24 right-0 h-72 w-72 text-white/10 blur-3xl"
           viewBox="0 0 200 200"
-          xmlns="http://www.w3.org/2000/svg"
+          xmlns="https://i.postimg.cc/6qsJFhZh/temp-Imagej0by-Qj.avif"
           role="img"
           aria-label="Abstract blurred shape"
         >
@@ -276,19 +301,12 @@ function AboutPage() {
                 >
                   Explore Gallery
                 </a>
-                <a
-                  href="#upload"
-                  aria-label="Upload Artwork"
-                  className={`rounded-xl border border-white/30 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-md shadow-lg shadow-black/10 transition-transform hover:scale-[1.02] ${focusRing}`}
-                >
-                  Upload Artwork
-                </a>
               </div>
             </div>
             {/* Hero visual: local image placeholder */}
             <div className="relative mt-10 lg:mt-0">
               <img
-                src="/images/about-hero.jpg"
+                src="https://i.postimg.cc/6qsJFhZh/temp-Imagej0by-Qj.avif"
                 alt="Abstract AI art composition"
                 loading="lazy"
                 className="w-full rounded-2xl border border-white/10 bg-white/5 object-cover shadow-2xl"
@@ -305,7 +323,7 @@ function AboutPage() {
           className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8"
         >
           {/* Card */}
-          <article className="grid grid-cols-1 gap-6 rounded-2xl bg-white/10 p-6 backdrop-blur-md shadow-xl shadow-black/20 md:grid-cols-2">
+          <article className=" rounded-2xl bg-white/10 p-6 backdrop-blur-md shadow-xl shadow-black/20 md:grid-cols-2">
             <div>
               <h2 className="text-2xl sm:text-3xl font-bold">
                 Vision & Mission
@@ -322,15 +340,6 @@ function AboutPage() {
                 aesthetics, sentiment, and memorability, and Web3 primitives to
                 reward and track provenance.
               </p>
-            </div>
-            <div className="relative">
-              {/* Illustration placeholder */}
-              <img
-                src="/images/about-hero.jpg"
-                alt="AI-inspired illustration"
-                loading="lazy"
-                className="h-full w-full rounded-xl border border-white/10 bg-white/5 object-cover"
-              />
             </div>
           </article>
         </section>
@@ -431,41 +440,90 @@ function AboutPage() {
             the full collection to see evaluations, value estimations, and
             tokenization options.
           </p>
-          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
-            {[
-              "/images/about-hero.jpg",
-              "/images/about-hero.jpg",
-              "/images/about-hero.jpg",
-            ].map((src, i) => (
-              <article
-                key={i}
-                ref={(el) => (previewCardsRef.current[i] = el)}
-                className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-lg shadow-black/20"
-              >
-                <img
-                  src={src}
-                  alt={`Preview artwork ${i + 1}`}
-                  loading="lazy"
-                  className="h-40 w-full object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold">
-                    Featured Artwork {i + 1}
-                  </h3>
-                  <p className="mt-1 text-sm text-white/80">
-                    AI-evaluated • Tokenizable
-                  </p>
-                </div>
-              </article>
-            ))}
+          <p className="mt-1 text-sm text-white/60 sm:hidden">
+            ← Swipe to explore more artworks →
+          </p>
+
+          {/* Horizontal scroll container for mobile, grid for desktop */}
+          <div
+            className="mt-6 overflow-x-auto sm:overflow-x-visible scrollbar-hide"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            <div className="flex gap-6 sm:grid sm:grid-cols-2 lg:grid-cols-3 min-w-max sm:min-w-0 pb-2">
+              {galleryArtworks.length > 0
+                ? galleryArtworks.map((artwork, i) => (
+                    <article
+                      key={artwork.id || i}
+                      ref={(el) => (previewCardsRef.current[i] = el)}
+                      className="flex-shrink-0 w-80 sm:w-auto overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-black/30 transition-all duration-300"
+                    >
+                      <img
+                        src={artwork.image_url}
+                        alt={artwork.title}
+                        loading="lazy"
+                        className="h-40 w-full object-cover"
+                      />
+                      <div className="p-4">
+                        <h3 className="text-lg font-semibold text-white truncate">
+                          {artwork.title}
+                        </h3>
+                        <p className="text-sm text-white/70 mb-2">
+                          by {artwork.artist}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="inline-block px-2 py-1 text-xs font-medium bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full">
+                            {artwork.classification}
+                          </span>
+                          <span className="text-sm font-semibold text-green-400">
+                            ${artwork.art_value_usd?.toLocaleString() || "N/A"}
+                          </span>
+                        </div>
+                        <div className="mt-2 flex items-center gap-2">
+                          <div className="flex-1 bg-white/10 rounded-full h-1.5">
+                            <div
+                              className="bg-gradient-to-r from-blue-500 to-purple-600 h-1.5 rounded-full"
+                              style={{
+                                width: `${
+                                  artwork.classification_percentage || 0
+                                }%`,
+                              }}
+                            ></div>
+                          </div>
+                          <span className="text-xs text-white/60">
+                            {artwork.classification_percentage?.toFixed(1) || 0}
+                            %
+                          </span>
+                        </div>
+                      </div>
+                    </article>
+                  ))
+                : // Loading placeholder
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <article
+                      key={`loading-${i}`}
+                      className="flex-shrink-0 w-80 sm:w-auto overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-lg shadow-black/20 animate-pulse"
+                    >
+                      <div className="h-40 w-full bg-white/10"></div>
+                      <div className="p-4">
+                        <div className="h-5 bg-white/10 rounded mb-2"></div>
+                        <div className="h-4 bg-white/10 rounded w-2/3 mb-2"></div>
+                        <div className="flex justify-between items-center">
+                          <div className="h-6 bg-white/10 rounded-full w-20"></div>
+                          <div className="h-4 bg-white/10 rounded w-16"></div>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+            </div>
           </div>
-          <div className="mt-6">
+
+          <div className="mt-8 text-center">
             <a
-              href="#gallery"
+              href="/gallery"
               aria-label="Open Gallery"
-              className={`inline-block rounded-xl bg-white text-black px-5 py-3 text-sm font-semibold shadow-lg shadow-black/10 transition-transform hover:scale-[1.02] ${focusRing}`}
+              className={`inline-block rounded-xl bg-white text-black px-6 py-3 text-sm font-semibold shadow-lg shadow-black/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl ${focusRing}`}
             >
-              Open Gallery
+              Explore Full Gallery →
             </a>
           </div>
         </section>
@@ -486,18 +544,39 @@ function AboutPage() {
             {[
               {
                 name: "Samin Israk",
-                role: "Founder & ML Engineer",
-                bio: "Building aesthetic and valuation models.",
+                role: "Project Lead, Frontend Developer, and Blockchain Engineer",
+                university: "North South University",
+                bio: "Oversees the project development, implements frontend solutions, and integrates blockchain functionalities for secure and decentralized workflows.",
+                image: "https://i.postimg.cc/kG86dwpM/temp-Image-Kjgh-C9.avif",
               },
               {
-                name: "Maya Kapoor",
-                role: "Product & Design",
-                bio: "Shapes the creative UX and on-chain flows.",
+                name: "A.F.M. Khairul Amin",
+                role: "Data Engineer & Project Manager",
+                university: "North South University",
+                bio: "Manages the project timeline, coordinates the team, and ensures smooth data pipeline operations for reliable analytics and system performance.",
+                image: "https://avatars.githubusercontent.com/u/197520522?v=4",
               },
               {
-                name: "Kenji Tanaka",
-                role: "Blockchain Engineer",
-                bio: "Leads smart-contract integration and token design.",
+                name: "Md. Shahporan Hosen Shanto",
+                role: "Backend Developer",
+                university: "North South University",
+                bio: "Designs and develops backend systems, manages databases, and implements server-side logic to support the platform's functionalities.",
+                image: "https://avatars.githubusercontent.com/u/121654189?v=4",
+              },
+              {
+                name: "Md. Razwanul Islam Tanvir",
+                role: "Research & Development",
+                university: "North South University",
+                bio: "Leads experimental workflows, explores new algorithms and AI models, and drives research initiatives to enhance the project's technical capabilities.",
+                image: "https://avatars.githubusercontent.com/u/90282182?v=4",
+              },
+              {
+                name: "Dr. Mohammad Abdul Qayum",
+                role: "Faculty Advisor, Research & Development",
+                university: "North South University",
+                bio: "Provides academic guidance, reviews research methodologies, and advises on innovative solutions and technical strategies for the project.",
+                image:
+                  "https://ece.northsouth.edu/wp-content/uploads/2025/01/ResumePic3.jpg",
               },
             ].map((m, i) => (
               <article
@@ -507,9 +586,7 @@ function AboutPage() {
               >
                 <div className="mb-4 h-24 w-24 overflow-hidden rounded-full border border-white/20 bg-white/10">
                   <img
-                    src={`/images/team-${m.name
-                      .split(" ")[0]
-                      .toLowerCase()}.jpg`}
+                    src={m.image}
                     alt={`${m.name} portrait`}
                     loading="lazy"
                     className="h-full w-full object-cover"
@@ -517,6 +594,13 @@ function AboutPage() {
                 </div>
                 <h3 className="text-lg font-semibold">{m.name}</h3>
                 <p className="text-sm text-white/80">{m.role}</p>
+                {m.university && (
+                  <div className="mt-2 inline-block rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-3 py-1">
+                    <p className="text-xs font-medium text-white">
+                      {m.university}
+                    </p>
+                  </div>
+                )}
                 <p className="mt-2 text-sm text-white/90">{m.bio}</p>
               </article>
             ))}
@@ -630,8 +714,6 @@ function AboutPage() {
           </p>
         </section>
       </main>
-
-
     </div>
   );
 }

@@ -320,7 +320,7 @@ const LoginForm = () => {
             {/* Email Field */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-slate-700">
-                Email Address
+                Email Address - (admin@gmail.com)
               </label>
               <div className="relative group">
                 <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5 group-focus-within:text-blue-500 transition-colors" />
@@ -347,7 +347,7 @@ const LoginForm = () => {
             {/* Password Field */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-slate-700">
-                Password
+                Password - (1234admin)
               </label>
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5 group-focus-within:text-blue-500 transition-colors" />

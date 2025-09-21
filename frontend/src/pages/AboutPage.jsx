@@ -2,6 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+// Import model training images
+import model21 from "../assets/images/model-training-images/21.png";
+import model22 from "../assets/images/model-training-images/22.png";
+import model23 from "../assets/images/model-training-images/23.png";
+import model24 from "../assets/images/model-training-images/24.png";
+import model25 from "../assets/images/model-training-images/25.png";
+
 gsap.registerPlugin(ScrollTrigger);
 
 function AboutPage() {
@@ -427,6 +434,102 @@ function AboutPage() {
               value.
             </p>
           </div>
+
+          {/* Model Training Images */}
+          <div className="mt-8 space-y-6">
+            <h3 className="text-xl font-semibold text-white">
+              Model Training Process
+            </h3>
+
+            {/* Image 21 */}
+            <div className="rounded-2xl bg-white/10 p-4 backdrop-blur-md shadow-lg shadow-black/20">
+              <img
+                src={model21}
+                alt="Model training process - Step 1"
+                className="w-full h-auto rounded-xl border border-white/10"
+                loading="lazy"
+              />
+            </div>
+
+            {/* Images 22 and 23 side by side */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="rounded-2xl bg-white/10 p-4 backdrop-blur-md shadow-lg shadow-black/20">
+                <img
+                  src={model22}
+                  alt="Model training process - Step 2"
+                  className="w-full h-auto rounded-xl border border-white/10"
+                  loading="lazy"
+                />
+              </div>
+              <div className="rounded-2xl bg-white/10 p-4 backdrop-blur-md shadow-lg shadow-black/20">
+                <img
+                  src={model23}
+                  alt="Model training process - Step 3"
+                  className="w-full h-auto rounded-xl border border-white/10"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+
+            {/* Image 24 */}
+            <div className="rounded-2xl bg-white/10 p-4 backdrop-blur-md shadow-lg shadow-black/20">
+              <img
+                src={model24}
+                alt="Model training process - Step 4"
+                className="w-full h-auto rounded-xl border border-white/10"
+                loading="lazy"
+              />
+            </div>
+
+            {/* Image 25 */}
+            <div className="rounded-2xl bg-white/10 p-4 backdrop-blur-md shadow-lg shadow-black/20">
+              <img
+                src={model25}
+                alt="Model training process - Step 5"
+                className="w-full h-auto rounded-xl border border-white/10"
+                loading="lazy"
+              />
+            </div>
+          </div>
+
+          {/* GitHub Repository Button */}
+          <div className="mt-6 flex justify-center">
+            <a
+              href="https://github.com/Samin1362/MerakiNexus-V2/tree/main/art_classification_model/subject-2%20(CSE499-B)"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View Model Research on GitHub"
+              className={`inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:from-purple-500 hover:to-indigo-500 ${focusRing}`}
+            >
+              <svg
+                className="h-5 w-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              View Research Repository
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                />
+              </svg>
+            </a>
+          </div>
         </section>
 
         {/* Gallery Preview + CTA: horizontal scroll on mobile */}
@@ -690,17 +793,11 @@ function AboutPage() {
         >
           <h2 className="text-2xl sm:text-3xl font-bold">Join the Nexus</h2>
           <p className="mt-2 text-white/90">
-            Upload your work, explore the gallery, or join our research
+            Explore the gallery, or join our research
             community.
           </p>
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <a
-              href="#upload"
-              aria-label="Upload Artwork"
-              className={`rounded-xl bg-white text-black px-5 py-3 text-sm font-semibold shadow-lg shadow-black/10 transition-transform hover:scale-[1.02] ${focusRing}`}
-            >
-              Upload Artwork
-            </a>
+          <div className="mt-3 items-center">
+            
             <a
               href="mailto:hello@merakinexus.example"
               aria-label="Contact Us"
@@ -710,7 +807,7 @@ function AboutPage() {
             </a>
           </div>
           <p className="mt-4 text-sm text-white/80">
-            Contact: hello@merakinexus.example
+            Contact: saminisrak1991@gmail.com
           </p>
         </section>
       </main>

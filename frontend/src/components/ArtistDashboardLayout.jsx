@@ -53,11 +53,6 @@ const ArtistDashboardLayout = () => {
       label: "My Artworks",
       icon: FolderOpen,
     },
-    {
-      path: "/artist-dashboard/upload",
-      label: "Upload Artwork",
-      icon: ImagePlus,
-    },
     { path: "/artist-dashboard/earnings", label: "Earnings", icon: BarChart },
     { path: "/artist-dashboard/settings", label: "Settings", icon: Settings },
   ];
@@ -199,14 +194,6 @@ const ArtistDashboardLayout = () => {
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Notifications */}
-              <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                <Bell size={20} className="text-gray-600" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">
-                  2
-                </span>
-              </button>
-
               {/* Profile */}
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                 <span className="text-white font-medium text-sm">

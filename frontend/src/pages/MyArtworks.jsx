@@ -1,74 +1,46 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
+import { useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
-import { Trash2, Edit3, Plus, X, Palette } from "lucide-react";
+import { Trash2, Edit3, Plus, X, Palette, Loader2 } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { getAccessToken } from "../utils/auth";
 
-// Demo data for artworks
-const DEMO_ARTWORKS = [
-  {
-    _id: "1",
-    title: "Blue Dreams",
-    artist: "Chloe Dubois",
-    image_url: "https://picsum.photos/seed/art12/600/400",
-    classification: "Futurism",
-    classification_percentage: 95.2,
-    art_value_usd: 17200,
-    created_year: "2023",
-    medium: "Digital",
-    tags: ["neon", "cityscape", "future"],
-  },
-  {
-    _id: "2",
-    title: "Ethereal Landscapes",
-    artist: "Marcus Chen",
-    image_url: "https://picsum.photos/seed/art34/600/400",
-    classification: "Abstract",
-    classification_percentage: 88.7,
-    art_value_usd: 12500,
-    created_year: "2024",
-    medium: "Oil on Canvas",
-    tags: ["abstract", "landscape", "modern"],
-  },
-  {
-    _id: "3",
-    title: "Urban Pulse",
-    artist: "Sofia Rodriguez",
-    image_url: "https://picsum.photos/seed/art56/600/400",
-    classification: "Contemporary",
-    classification_percentage: 92.4,
-    art_value_usd: 8900,
-    created_year: "2024",
-    medium: "Acrylic",
-    tags: ["urban", "street", "contemporary"],
-  },
-  {
-    _id: "4",
-    title: "Quantum Reflections",
-    artist: "Alex Thompson",
-    image_url: "https://picsum.photos/seed/art78/600/400",
-    classification: "Surrealism",
-    classification_percentage: 91.3,
-    art_value_usd: 15600,
-    created_year: "2023",
-    medium: "Mixed Media",
-    tags: ["quantum", "reflection", "surreal"],
-  },
-  {
-    _id: "5",
-    title: "Digital Harmony",
-    artist: "Emma Wilson",
-    image_url: "https://picsum.photos/seed/art90/600/400",
-    classification: "Digital Art",
-    classification_percentage: 96.8,
-    art_value_usd: 22000,
-    created_year: "2024",
-    medium: "Digital",
-    tags: ["harmony", "digital", "vibrant"],
-  },
-];
+// Loading skeleton component
+const SkeletonCard = () => (
+  <div className="rounded-2xl bg-white/5 p-6 backdrop-blur-md shadow-lg shadow-black/20 animate-pulse">
+    <div className="h-48 bg-white/10 rounded-xl mb-4"></div>
+    <div className="space-y-3">
+      <div className="h-6 bg-white/10 rounded w-3/4"></div>
+      <div className="h-4 bg-white/10 rounded w-1/2"></div>
+      <div className="flex justify-between items-center">
+        <div className="h-6 bg-white/10 rounded-full w-20"></div>
+        <div className="h-4 bg-white/10 rounded w-16"></div>
+      </div>
+      <div className="flex gap-2 mt-4">
+        <div className="h-8 bg-white/10 rounded w-16"></div>
+        <div className="h-8 bg-white/10 rounded w-16"></div>
+      </div>
+    </div>
+  </div>
+);
+
+// Loading spinner component
+const LoadingSpinner = () => (
+  <div className="flex flex-col items-center justify-center py-12">
+    <Loader2 className="h-12 w-12 animate-spin text-blue-500 mb-4" />
+    <p className="text-white/70 text-lg">Loading your artworks...</p>
+  </div>
+);
 
 const MyArtworks = () => {
+  // Auth context and navigation
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   // State management
-  const [artworks, setArtworks] = useState(DEMO_ARTWORKS);
+  const [artworks, setArtworks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedArtwork, setSelectedArtwork] = useState(null);
@@ -141,6 +113,65 @@ const MyArtworks = () => {
     }
   }, [editModalOpen, deleteModalOpen]);
 
+  // Fetch artworks from API
+  useEffect(() => {
+    const fetchArtworks = async () => {
+      if (!user?.email) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Get access token for authentication
+        const accessToken = getAccessToken();
+        if (!accessToken) {
+          throw new Error("No access token found. Please log in again.");
+        }
+
+        // Clean the token (remove Bearer prefix if present)
+        const authToken = accessToken.replace(/^Bearer\s+/i, "");
+
+        const response = await fetch(
+          "https://meraki-nexus-api.vercel.app/meraki-nexus-api/nexus/",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: authToken,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success && Array.isArray(data.data)) {
+          // Filter artworks by user email
+          const userArtworks = data.data.filter(
+            (artwork) => artwork.user?.email === user.email
+          );
+          setArtworks(userArtworks);
+        } else {
+          throw new Error(data.message || "Failed to fetch artworks");
+        }
+      } catch (err) {
+        console.error("Error fetching artworks:", err);
+        setError(err.message || "Failed to load artworks");
+        setArtworks([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArtworks();
+  }, [user?.email]);
+
   // CRUD Operations
   const handleEdit = (artwork) => {
     setSelectedArtwork(artwork);
@@ -187,10 +218,68 @@ const MyArtworks = () => {
   };
 
   const handleCreateNew = () => {
-    // In a real app, this would navigate to upload route
-    console.log("Navigate to upload artwork page");
-    // Example: navigate('/artist-dashboard/upload');
+    // Navigate to the main upload page
+    navigate("/upload");
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="w-full">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              My Artworks
+            </h1>
+            <p className="text-gray-600">
+              Manage and showcase your creative collection
+            </p>
+          </div>
+          <button
+            disabled
+            className="flex items-center gap-2 px-6 py-3 bg-gray-400 text-white rounded-xl cursor-not-allowed"
+          >
+            <Plus className="w-5 h-5" />
+            Upload New Artwork
+          </button>
+        </div>
+
+        {/* Loading Content */}
+        <LoadingSpinner />
+
+        {/* Skeleton Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="w-full">
+        <div className="text-center py-20">
+          <div className="text-red-500 mb-4">
+            <X className="w-24 h-24 mx-auto mb-4" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            Error Loading Artworks
+          </h3>
+          <p className="text-gray-500 mb-6">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors duration-200"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
@@ -459,4 +548,46 @@ const MyArtworks = () => {
   );
 };
 
-export default MyArtworks;
+// Suspense wrapper component
+const MyArtworksWithSuspense = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="w-full">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                My Artworks
+              </h1>
+              <p className="text-gray-600">
+                Manage and showcase your creative collection
+              </p>
+            </div>
+            <button
+              disabled
+              className="flex items-center gap-2 px-6 py-3 bg-gray-400 text-white rounded-xl cursor-not-allowed"
+            >
+              <Plus className="w-5 h-5" />
+              Upload New Artwork
+            </button>
+          </div>
+
+          {/* Suspense Loading Content */}
+          <LoadingSpinner />
+
+          {/* Skeleton Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <MyArtworks />
+    </Suspense>
+  );
+};
+
+export default MyArtworksWithSuspense;

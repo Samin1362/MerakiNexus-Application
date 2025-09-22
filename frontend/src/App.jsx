@@ -21,8 +21,7 @@ import DashboardSettings from "./pages/DashboardSettings";
 // ✅ Artist Dashboard Imports
 import ArtistDashboardLayout from "./components/ArtistDashboardLayout";
 import ArtistHome from "./pages/ArtistHome";
-import MyArtworks from "./pages/MyArtworks";
-import ArtistUpload from "./pages/ArtistUpload";
+import MyArtworks from "./components/MyArtworks";
 import ArtistEarnings from "./pages/ArtistEarnings";
 import ArtistSettings from "./pages/ArtistSettings";
 
@@ -80,7 +79,6 @@ function App() {
         >
           <Route index element={<ArtistHome />} /> {/* /artist-dashboard */}
           <Route path="my-artworks" element={<MyArtworks />} />
-          <Route path="upload" element={<ArtistUpload />} />
           <Route path="earnings" element={<ArtistEarnings />} />
           <Route path="settings" element={<ArtistSettings />} />
         </Route>

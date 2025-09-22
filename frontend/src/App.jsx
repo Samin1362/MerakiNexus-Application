@@ -32,58 +32,63 @@ import ProtectedRoute, {
   ArtistRoute,
 } from "./components/ProtectedRoute";
 
+// ✅ Toast System
+import { ToastProvider } from "./components/Toast";
+
 import ScrollToTop from "./components/ScrollToTop";
 import RegistrationForm from "./pages/RegistrationForm";
 
 function App() {
   return (
     <AuthProvider>
-      <Navbar />
-      <ScrollToTop />
-      <Routes>
-        {/* 🌍 Public Routes */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/gallery" element={<GalleryPage />} />
-        <Route path="/upload" element={<UploadPage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/chatbot" element={<ChatbotApp />} />
-        <Route path="/login" element={<LoginForm />} />
-        <Route path="/register" element={<RegistrationForm />} />
-        <Route path="*" element={<NotFound />} />
+      <ToastProvider>
+        <Navbar />
+        <ScrollToTop />
+        <Routes>
+          {/* 🌍 Public Routes */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
+          <Route path="/upload" element={<UploadPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/chatbot" element={<ChatbotApp />} />
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/register" element={<RegistrationForm />} />
+          <Route path="*" element={<NotFound />} />
 
-        {/* 🛠️ Admin Dashboard Routes - Protected */}
-        <Route
-          path="/dashboard"
-          element={
-            <AdminRoute>
-              <DashboardLayout />
-            </AdminRoute>
-          }
-        >
-          <Route index element={<DashboardHome />} /> {/* /dashboard */}
-          <Route path="users" element={<div>Users Management</div>} />
-          <Route path="artworks" element={<DashboardArtworks />} />
-          <Route path="tokens" element={<DashboardToken />} />
-          <Route path="approvals" element={<DashboardApprovals />} />
-          <Route path="settings" element={<DashboardSettings />} />
-        </Route>
+          {/* 🛠️ Admin Dashboard Routes - Protected */}
+          <Route
+            path="/dashboard"
+            element={
+              <AdminRoute>
+                <DashboardLayout />
+              </AdminRoute>
+            }
+          >
+            <Route index element={<DashboardHome />} /> {/* /dashboard */}
+            <Route path="users" element={<div>Users Management</div>} />
+            <Route path="artworks" element={<DashboardArtworks />} />
+            <Route path="tokens" element={<DashboardToken />} />
+            <Route path="approvals" element={<DashboardApprovals />} />
+            <Route path="settings" element={<DashboardSettings />} />
+          </Route>
 
-        {/* 🎨 Artist Dashboard Routes - Protected */}
-        <Route
-          path="/artist-dashboard"
-          element={
-            <ArtistRoute>
-              <ArtistDashboardLayout />
-            </ArtistRoute>
-          }
-        >
-          <Route index element={<ArtistHome />} /> {/* /artist-dashboard */}
-          <Route path="my-artworks" element={<MyArtworks />} />
-          <Route path="earnings" element={<ArtistEarnings />} />
-          <Route path="settings" element={<ArtistSettings />} />
-        </Route>
-      </Routes>
-      <Footer />
+          {/* 🎨 Artist Dashboard Routes - Protected */}
+          <Route
+            path="/artist-dashboard"
+            element={
+              <ArtistRoute>
+                <ArtistDashboardLayout />
+              </ArtistRoute>
+            }
+          >
+            <Route index element={<ArtistHome />} /> {/* /artist-dashboard */}
+            <Route path="my-artworks" element={<MyArtworks />} />
+            <Route path="earnings" element={<ArtistEarnings />} />
+            <Route path="settings" element={<ArtistSettings />} />
+          </Route>
+        </Routes>
+        <Footer />
+      </ToastProvider>
     </AuthProvider>
   );
 }

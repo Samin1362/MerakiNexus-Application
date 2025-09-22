@@ -4,6 +4,7 @@ import { gsap } from "gsap";
 import { Plus, X, Palette, Loader2, Trash2, Edit3 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { getAccessToken } from "../../utils/auth";
+import { useToast } from "../Toast";
 import MyArtwork from "./MyArtwork";
 
 // Loading skeleton component
@@ -37,6 +38,7 @@ const MyArtworks = () => {
   // Auth context and navigation
   const { user } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
 
   // State management
   const [artworks, setArtworks] = useState([]);
@@ -44,13 +46,15 @@ const MyArtworks = () => {
   const [error, setError] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedArtwork, setSelectedArtwork] = useState(null);
+  const [originalArtwork, setOriginalArtwork] = useState(null);
   const [selectedArtworkDetails, setSelectedArtworkDetails] = useState(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
-  const [toast, setToast] = useState(null);
+  const [isUpdatingArtwork, setIsUpdatingArtwork] = useState(false);
   const [editForm, setEditForm] = useState({
     title: "",
-    medium: "",
+    classification: "",
+    art_value_usd: "",
     created_year: "",
     tags: "",
   });
@@ -176,29 +180,140 @@ const MyArtworks = () => {
     fetchArtworks();
   }, [user?.email]);
 
-  const handleEditSubmit = () => {
-    // Update artwork in local state
-    setArtworks((prev) =>
-      prev.map((artwork) =>
-        artwork._id === selectedArtwork._id
-          ? {
-              ...artwork,
-              title: editForm.title,
-              medium: editForm.medium,
-              created_year: editForm.created_year,
-              tags: editForm.tags.split(",").map((tag) => tag.trim()),
-            }
-          : artwork
-      )
-    );
-    setEditModalOpen(false);
-    setSelectedArtwork(null);
-  };
+  const handleEditSubmit = async () => {
+    if (!selectedArtwork || !originalArtwork) {
+      toast.error("No artwork selected for editing");
+      return;
+    }
 
-  // Toast utility function
-  const showToast = (message, type = "success") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
+    setIsUpdatingArtwork(true);
+
+    try {
+      // Get access token for authentication
+      const accessToken = getAccessToken();
+      if (!accessToken) {
+        toast.error("No access token found. Please log in again.");
+        return;
+      }
+
+      // Clean the token (remove Bearer prefix if present)
+      const authToken = accessToken.replace(/^Bearer\s+/i, "");
+
+      // Prepare current form values for comparison
+      const currentValues = {
+        title: editForm.title.trim(),
+        classification: editForm.classification.trim(),
+        art_value_usd: parseFloat(editForm.art_value_usd) || 0,
+        created_year: parseInt(editForm.created_year) || 0,
+        tags: editForm.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag.length > 0),
+      };
+
+      // Prepare original values for comparison
+      const originalValues = {
+        title: originalArtwork.title || "",
+        classification: originalArtwork.classification || "",
+        art_value_usd: originalArtwork.art_value_usd || 0,
+        created_year: originalArtwork.created_year || 0,
+        tags: Array.isArray(originalArtwork.tags) ? originalArtwork.tags : [],
+      };
+
+      // Create update payload with only changed properties
+      const updatePayload = {};
+      let hasChanges = false;
+
+      // Check each property for changes
+      if (currentValues.title !== originalValues.title) {
+        updatePayload.title = currentValues.title;
+        hasChanges = true;
+      }
+
+      if (currentValues.classification !== originalValues.classification) {
+        updatePayload.classification = currentValues.classification;
+        hasChanges = true;
+      }
+
+      if (currentValues.art_value_usd !== originalValues.art_value_usd) {
+        updatePayload.art_value_usd = currentValues.art_value_usd;
+        hasChanges = true;
+      }
+
+      if (currentValues.created_year !== originalValues.created_year) {
+        updatePayload.created_year = currentValues.created_year;
+        hasChanges = true;
+      }
+
+      // Compare tags arrays
+      const tagsChanged =
+        currentValues.tags.length !== originalValues.tags.length ||
+        !currentValues.tags.every(
+          (tag, index) => tag === originalValues.tags[index]
+        );
+
+      if (tagsChanged) {
+        updatePayload.tags = currentValues.tags;
+        hasChanges = true;
+      }
+
+      // If no changes detected, just close the modal
+      if (!hasChanges) {
+        toast.info("No changes detected");
+        setEditModalOpen(false);
+        setSelectedArtwork(null);
+        setOriginalArtwork(null);
+        return;
+      }
+
+      // Send PATCH request to update artwork
+      const response = await fetch(
+        `https://meraki-nexus-api.vercel.app/meraki-nexus-api/nexus/${selectedArtwork._id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: authToken,
+          },
+          body: JSON.stringify(updatePayload),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update artwork in local state
+        setArtworks((prev) =>
+          prev.map((artwork) =>
+            artwork._id === selectedArtwork._id
+              ? {
+                  ...artwork,
+                  ...updatePayload,
+                }
+              : artwork
+          )
+        );
+
+        // Close modal and reset state
+        setEditModalOpen(false);
+        setSelectedArtwork(null);
+        setOriginalArtwork(null);
+
+        // Show success toast
+        toast.success("Artwork updated successfully!");
+      } else {
+        throw new Error(data.message || "Failed to update artwork");
+      }
+    } catch (error) {
+      console.error("Update artwork error:", error);
+      toast.error("Failed to update artwork");
+    } finally {
+      setIsUpdatingArtwork(false);
+    }
   };
 
   // CRUD Handlers
@@ -207,7 +322,7 @@ const MyArtworks = () => {
       // Get access token for authentication
       const accessToken = getAccessToken();
       if (!accessToken) {
-        showToast("No access token found. Please log in again.", "error");
+        toast.error("No access token found. Please log in again.");
         return;
       }
 
@@ -234,7 +349,7 @@ const MyArtworks = () => {
 
       if (data.success) {
         // Success - show toast and remove from state
-        showToast("Artwork deleted successfully!");
+        toast.success("Artwork deleted successfully!");
         setArtworks((prev) =>
           prev.filter((artwork) => artwork._id !== artworkId)
         );
@@ -243,17 +358,19 @@ const MyArtworks = () => {
       }
     } catch (error) {
       console.error("Delete artwork error:", error);
-      showToast("Failed to delete artwork", "error");
+      toast.error("Failed to delete artwork");
     }
   };
 
   const handleEditArtwork = (artwork) => {
     setSelectedArtwork(artwork);
+    setOriginalArtwork(artwork); // Store original for comparison
     setEditForm({
-      title: artwork.title,
-      medium: artwork.medium,
-      created_year: artwork.created_year,
-      tags: artwork.tags.join(", "),
+      title: artwork.title || "",
+      classification: artwork.classification || "",
+      art_value_usd: artwork.art_value_usd?.toString() || "",
+      created_year: artwork.created_year?.toString() || "",
+      tags: Array.isArray(artwork.tags) ? artwork.tags.join(", ") : "",
     });
     setEditModalOpen(true);
   };
@@ -266,7 +383,7 @@ const MyArtworks = () => {
       // Get access token for authentication
       const accessToken = getAccessToken();
       if (!accessToken) {
-        showToast("No access token found. Please log in again.", "error");
+        toast.error("No access token found. Please log in again.");
         return;
       }
 
@@ -299,7 +416,7 @@ const MyArtworks = () => {
       }
     } catch (error) {
       console.error("Fetch artwork details error:", error);
-      showToast("Failed to fetch artwork details", "error");
+      toast.error("Failed to fetch artwork details");
       // Close modal on error
       setIsDetailsModalOpen(false);
       setSelectedArtworkDetails(null);
@@ -455,33 +572,59 @@ const MyArtworks = () => {
                     }))
                   }
                   className="w-full px-3 py-2 bg-white/50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
+                  disabled={isUpdatingArtwork}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Classification
+                </label>
+                <input
+                  type="text"
+                  value={editForm.classification}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      classification: e.target.value,
+                    }))
+                  }
+                  className="w-full px-3 py-2 bg-white/50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
+                  placeholder="e.g., Abstract, Portrait, Landscape"
+                  disabled={isUpdatingArtwork}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Medium
+                    Art Value (USD)
                   </label>
                   <input
-                    type="text"
-                    value={editForm.medium}
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={editForm.art_value_usd}
                     onChange={(e) =>
                       setEditForm((prev) => ({
                         ...prev,
-                        medium: e.target.value,
+                        art_value_usd: e.target.value,
                       }))
                     }
                     className="w-full px-3 py-2 bg-white/50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
+                    placeholder="0.00"
+                    disabled={isUpdatingArtwork}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Year
+                    Year Created
                   </label>
                   <input
-                    type="text"
+                    type="number"
+                    min="1000"
+                    max="9999"
                     value={editForm.created_year}
                     onChange={(e) =>
                       setEditForm((prev) => ({
@@ -490,6 +633,8 @@ const MyArtworks = () => {
                       }))
                     }
                     className="w-full px-3 py-2 bg-white/50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
+                    placeholder="2024"
+                    disabled={isUpdatingArtwork}
                   />
                 </div>
               </div>
@@ -505,22 +650,44 @@ const MyArtworks = () => {
                     setEditForm((prev) => ({ ...prev, tags: e.target.value }))
                   }
                   className="w-full px-3 py-2 bg-white/50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
-                  placeholder="neon, cityscape, future"
+                  placeholder="abstract, modern, colorful"
+                  disabled={isUpdatingArtwork}
                 />
               </div>
 
               <div className="flex gap-3 pt-4">
                 <button
-                  onClick={() => setEditModalOpen(false)}
-                  className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                  onClick={() => {
+                    setEditModalOpen(false);
+                    setSelectedArtwork(null);
+                    setOriginalArtwork(null);
+                  }}
+                  disabled={isUpdatingArtwork}
+                  className={`flex-1 px-4 py-2 rounded-lg transition-colors duration-200 ${
+                    isUpdatingArtwork
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleEditSubmit}
-                  className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200"
+                  disabled={isUpdatingArtwork}
+                  className={`flex-1 px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 ${
+                    isUpdatingArtwork
+                      ? "bg-purple-400 text-white cursor-not-allowed"
+                      : "bg-purple-600 text-white hover:bg-purple-700"
+                  }`}
                 >
-                  Save Changes
+                  {isUpdatingArtwork ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
                 </button>
               </div>
             </div>
@@ -728,80 +895,6 @@ const MyArtworks = () => {
                   </span>
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Toast Notification */}
-      {toast && (
-        <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top duration-300">
-          <div
-            className={`max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden ${
-              toast.type === "error"
-                ? "border-l-4 border-red-500"
-                : "border-l-4 border-green-500"
-            }`}
-          >
-            <div className="p-4">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  {toast.type === "error" ? (
-                    <svg
-                      className="h-6 w-6 text-red-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      className="h-6 w-6 text-green-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  )}
-                </div>
-                <div className="ml-3 w-0 flex-1 pt-0.5">
-                  <p className="text-sm font-medium text-gray-900">
-                    {toast.type === "error" ? "Error" : "Success"}
-                  </p>
-                  <p className="mt-1 text-sm text-gray-500">{toast.message}</p>
-                </div>
-                <div className="ml-4 flex-shrink-0 flex">
-                  <button
-                    className="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    onClick={() => setToast(null)}
-                  >
-                    <span className="sr-only">Close</span>
-                    <svg
-                      className="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         </div>

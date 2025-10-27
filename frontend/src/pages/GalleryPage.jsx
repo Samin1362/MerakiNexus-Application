@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useNavigate } from "react-router-dom";
 import { getAccessToken } from "../utils/auth";
+import { useAuth } from "../contexts/AuthContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,56 +19,48 @@ function GalleryPage() {
   const modalRef = useRef(null);
   const overlayRef = useRef(null);
 
-  // 🔑 Replace with how you store/retrieve your token
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const accessToken = getAccessToken();
 
-  // Fetch artworks - conditionally from API or local JSON based on login state
+  // Fetch artworks from API
   useEffect(() => {
     const fetchArtworks = async () => {
       try {
-        // If user is not logged in (no access token), load from local JSON
-        if (!accessToken) {
-          const res = await fetch("/art-data.json");
-          const data = await res.json();
-          const list = Array.isArray(data)
-            ? data
-            : Array.isArray(data?.artworks)
-            ? data.artworks
-            : [];
-          setArtworks(list);
-          setLoading(false);
-          return;
-        }
+        console.log("🎨 Fetching artworks from API...");
 
-        // If user is logged in, fetch from API
-        const authToken = accessToken.replace(/^Bearer\s+/i, "");
-        console.log("check: ", accessToken);
+        // Always fetch from API now
         const res = await fetch(
           "https://meraki-nexus-api.vercel.app/meraki-nexus-api/nexus/",
           {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-              Authorization: authToken,
+              // Include auth token if available for authenticated requests
+              ...(accessToken && {
+                Authorization: accessToken.replace(/^Bearer\s+/i, ""),
+              }),
             },
           }
         );
 
         const data = await res.json();
+        console.log("📥 API Response:", data);
 
         if (res.ok && data.success) {
           setArtworks(Array.isArray(data.data) ? data.data : []);
+          console.log(
+            "✅ Artworks loaded successfully:",
+            data.data.length,
+            "items"
+          );
         } else {
           setError(data.message || "Failed to load artworks.");
+          console.error("❌ API Error:", data);
         }
       } catch (err) {
-        console.log("error: ", err);
-        if (!accessToken) {
-          // If loading local JSON fails, set empty array
-          setArtworks([]);
-        } else {
-          setError("Unable to fetch artworks. Please try again later.");
-        }
+        console.error("❌ Network Error:", err);
+        setError("Unable to connect to server. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -230,7 +224,7 @@ function GalleryPage() {
       >
         <div
           ref={modalRef}
-          className="relative mx-4 w-full max-w-3xl rounded-2xl bg-zinc-900 p-6 text-white shadow-2xl"
+          className="relative mx-4 w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl bg-zinc-900 p-6 text-white shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           <button
@@ -241,80 +235,219 @@ function GalleryPage() {
             ×
           </button>
           {selected && (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div className="overflow-hidden rounded-xl bg-black">
-                <img
-                  src={selected.image_url}
-                  alt={selected.title}
-                  className="w-full object-cover"
-                />
+            <div className="space-y-6">
+              {/* Header Section */}
+              <div className="text-center">
+                <h2 className="text-3xl font-bold">{selected.title}</h2>
+                <p className="text-white/80 text-xl mt-2">{selected.artist}</p>
               </div>
-              <div>
-                <h2 className="text-2xl font-bold">{selected.title}</h2>
-                <p className="text-white/80">{selected.artist}</p>
-                <div className="mt-3 grid grid-cols-2 gap-3 text-sm text-white/90">
-                  <div>
-                    <span className="text-white/60">Year:</span>{" "}
-                    {selected.created_year}
+
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                {/* Image Section */}
+                <div className="overflow-hidden rounded-xl bg-black">
+                  <img
+                    src={selected.image_url}
+                    alt={selected.title}
+                    className="w-full object-cover"
+                  />
+                </div>
+
+                {/* Details Section */}
+                <div className="space-y-4">
+                  {/* Pricing & Availability Section */}
+                  <div className="p-4 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 rounded-xl border border-purple-400/30">
+                    <h3 className="text-lg font-semibold mb-3 text-purple-200">
+                      Pricing & Availability
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-purple-200 font-medium">
+                          Price per Unit:
+                        </span>
+                        <p className="text-white font-bold text-lg">
+                          {selected.price_per_unit} ETH
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-purple-200 font-medium">
+                          Available:
+                        </span>
+                        <p className="text-white font-bold text-lg">
+                          {selected.available} units
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-purple-400/20">
+                      <span className="text-purple-200 font-medium">
+                        Total Value:
+                      </span>
+                      <p className="text-white font-bold text-xl">
+                        ${Number(selected.art_value_usd).toLocaleString()}
+                      </p>
+                    </div>
+
+                    {/* Buy Now Button */}
+                    <div className="mt-4">
+                      {isAuthenticated ? (
+                        <button
+                          onClick={() => {
+                            navigate("/order", {
+                              state: {
+                                artwork: selected,
+                                artworkId: selected._id,
+                                price: selected.price_per_unit,
+                                title: selected.title,
+                                artist: selected.artist,
+                                available: selected.available,
+                              },
+                            });
+                          }}
+                          className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-green-500/25"
+                        >
+                          🛒 Buy Now - {selected.price_per_unit} ETH
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => navigate("/login")}
+                          className="w-full bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300"
+                        >
+                          🔐 Login to Purchase
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-white/60">Medium:</span>{" "}
-                    {selected.medium}
+
+                  {/* Artwork Details */}
+                  <div className="p-4 bg-white/5 rounded-xl">
+                    <h3 className="text-lg font-semibold mb-3">
+                      Artwork Details
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3 text-sm text-white/90">
+                      <div>
+                        <span className="text-white/60">Year:</span>{" "}
+                        <span className="font-medium">
+                          {selected.created_year}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-white/60">Medium:</span>{" "}
+                        <span className="font-medium">{selected.medium}</span>
+                      </div>
+                      <div>
+                        <span className="text-white/60">Classification:</span>{" "}
+                        <span className="font-medium">
+                          {selected.classification}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-white/60">Confidence:</span>{" "}
+                        <span className="font-medium">
+                          {Math.round(selected.classification_percentage)}%
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-white/60">Class:</span>{" "}
-                    {selected.classification}
-                  </div>
-                  <div>
-                    <span className="text-white/60">Confidence:</span>{" "}
-                    {Math.round(selected.classification_percentage)}%
-                  </div>
-                  <div className="col-span-2">
-                    <span className="text-white/60">Art Value:</span> ${" "}
-                    {Number(selected.art_value_usd).toLocaleString()}
-                  </div>
+
+                  {/* Artist Information */}
                   {selected.user && (
-                    <div className="col-span-2 text-xs text-white/70">
-                      Uploaded by: {selected.user.name} ({selected.user.email})
+                    <div className="p-4 bg-white/5 rounded-xl">
+                      <h3 className="text-lg font-semibold mb-3">
+                        Artist Information
+                      </h3>
+                      <div className="text-sm text-white/90 space-y-2">
+                        <p>
+                          <span className="text-white/60">Name:</span>{" "}
+                          <span className="font-medium">
+                            {selected.user.name}
+                          </span>
+                        </p>
+                        <p>
+                          <span className="text-white/60">Email:</span>{" "}
+                          <span className="font-medium">
+                            {selected.user.email}
+                          </span>
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
+              </div>
 
-                <div className="mt-4">
-                  <h3 className="font-semibold">Scores</h3>
-                  <ul className="mt-2 grid grid-cols-2 gap-2 text-sm text-white/90">
-                    {selected.scores &&
-                      Object.entries(selected.scores).map(([key, value]) => (
-                        <li
-                          key={key}
-                          className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2"
-                        >
-                          <span className="capitalize text-white/70">
-                            {key.replaceAll("_", " ")}
-                          </span>
-                          <span className="font-medium">
-                            {Number(value).toFixed(2)}
-                          </span>
-                        </li>
-                      ))}
-                  </ul>
+              {/* AI Scores Section */}
+              <div className="p-4 bg-white/5 rounded-xl">
+                <h3 className="text-lg font-semibold mb-3">
+                  AI Analysis Scores
+                </h3>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  {selected.scores &&
+                    Object.entries(selected.scores).map(([key, value]) => (
+                      <div
+                        key={key}
+                        className="text-center p-3 bg-white/5 rounded-lg border border-white/10"
+                      >
+                        <p className="text-xs text-white/60 capitalize mb-1">
+                          {key.replaceAll("_", " ")}
+                        </p>
+                        <p className="text-lg font-bold text-white">
+                          {Number(value).toFixed(2)}
+                        </p>
+                      </div>
+                    ))}
                 </div>
+              </div>
 
-                {selected.tags && selected.tags.length > 0 && (
-                  <div className="mt-4">
-                    <h3 className="font-semibold">Tags</h3>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {selected.tags.map((t) => (
-                        <span
-                          key={t}
-                          className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/80"
-                        >
-                          {t}
-                        </span>
-                      ))}
-                    </div>
+              {/* Tags Section */}
+              {selected.tags && selected.tags.length > 0 && (
+                <div className="p-4 bg-white/5 rounded-xl">
+                  <h3 className="text-lg font-semibold mb-3">Tags</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selected.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-200 text-sm rounded-full border border-purple-400/30"
+                      >
+                        {tag}
+                      </span>
+                    ))}
                   </div>
-                )}
+                </div>
+              )}
+
+              {/* Timestamps Section */}
+              <div className="p-4 bg-white/5 rounded-xl">
+                <h3 className="text-lg font-semibold mb-3">Timeline</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-white/70">
+                  <div>
+                    <span className="text-white/60">Created:</span>
+                    <p className="font-medium">
+                      {new Date(selected.createdAt).toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-white/60">Last Updated:</span>
+                    <p className="font-medium">
+                      {new Date(selected.updatedAt).toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           )}

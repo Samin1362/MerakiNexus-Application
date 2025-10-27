@@ -16,6 +16,7 @@ function UploadPage() {
   const [medium, setMedium] = useState("");
   const [tags, setTags] = useState("");
   const [classificationPercentage, setClassificationPercentage] = useState("");
+  const [pricePerUnit, setPricePerUnit] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [imagePreview, setImagePreview] = useState("");
   const [imageError, setImageError] = useState(false);
@@ -72,19 +73,18 @@ function UploadPage() {
     setImageError(false);
   };
 
-  
   const onSubmit = async (e) => {
     e.preventDefault();
-  
+
     console.log("🚀 UPLOAD STARTED - Debug Information:");
     console.log("📊 isAuthenticated:", isAuthenticated);
     console.log("👤 user from AuthContext:", user);
-  
+
     if (!isAuthenticated) {
       alert("You must be logged in to upload artwork. Please login first.");
       return;
     }
-  
+
     // Basic validation
     if (
       !title ||
@@ -93,34 +93,37 @@ function UploadPage() {
       !medium ||
       !tags ||
       !imageUrl ||
-      !classificationPercentage
+      !classificationPercentage ||
+      !pricePerUnit
     ) {
-      alert("Please fill in all fields including classification percentage and provide an image URL.");
+      alert(
+        "Please fill in all fields including classification percentage, price per unit, and provide an image URL."
+      );
       return;
     }
-  
+
     setIsSubmitting(true);
-  
+
     try {
       // Get access token from cookies
       const accessToken = getAccessToken();
-  
+
       console.log("🔑 Raw Access Token from cookies:", accessToken);
-  
+
       if (!accessToken) {
         alert("Authentication token not found. Please login again.");
         setIsSubmitting(false);
         return;
       }
-  
+
       // Normalize Bearer prefix
       const authToken = accessToken.replace(/^Bearer\s+/i, "");
-  
+
       console.log("✅ Authorization Token (final):", authToken);
-  
+
       // Construct payload
       let finalUserId = user?.id || user?._id || "68ccd9d5135eaf14c9360e0e";
-  
+
       const payload = {
         title,
         artist,
@@ -134,15 +137,20 @@ function UploadPage() {
           art_evaluation_score: 0.0,
         },
         art_value_usd: 0,
+        available: 1,
+        price_per_unit: parseFloat(pricePerUnit),
         created_year: year,
         medium,
-        tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+        tags: tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
         user: finalUserId,
       };
-  
+
       console.log("📤 Payload being sent:", payload);
       console.log("check: ", authToken);
-  
+
       // Make API request
       const response = await fetch(
         "https://meraki-nexus-api.vercel.app/meraki-nexus-api/nexus/",
@@ -155,17 +163,20 @@ function UploadPage() {
           body: JSON.stringify(payload),
         }
       );
-  
+
       const data = await response.json();
-  
+
       console.log("📥 API Response JSON:", data);
       console.log("📥 Response status:", response.status);
-      console.log("📥 Response headers:", Object.fromEntries(response.headers.entries()));
-  
+      console.log(
+        "📥 Response headers:",
+        Object.fromEntries(response.headers.entries())
+      );
+
       if (response.ok && data.success === true && data.statusCode === 201) {
         console.log("✅ Artwork created successfully!");
         console.log("🎨 Artwork ID:", data.data._id);
-  
+
         setShowSuccess(true);
         requestAnimationFrame(() => {
           const tl = gsap.timeline();
@@ -178,13 +189,19 @@ function UploadPage() {
             .fromTo(
               successRef.current,
               { opacity: 0, scale: 0.96, y: 8 },
-              { opacity: 1, scale: 1, y: 0, duration: 0.25, ease: "power3.out" },
+              {
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                duration: 0.25,
+                ease: "power3.out",
+              },
               "<"
             );
         });
       } else {
         console.error("❌ API Error Response:", data);
-  
+
         if (response.status === 401) {
           console.error("❌ 401 Unauthorized - Token is invalid or expired");
           alert("Your session is invalid or expired. Please login again.");
@@ -205,7 +222,6 @@ function UploadPage() {
       setIsSubmitting(false);
     }
   };
-  
 
   const closeSuccess = () => {
     const tl = gsap.timeline({
@@ -355,24 +371,42 @@ function UploadPage() {
               />
             </div>
 
-            <div ref={(el) => (fieldsRef.current[5] = el)}>
-              <label className="mb-1 block text-sm text-white/80">
-                Classification Percentage
-              </label>
-              <input
-                type="number"
-                value={classificationPercentage}
-                onChange={(e) => setClassificationPercentage(e.target.value)}
-                className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 outline-none placeholder-white/60 focus:border-white/40 focus:bg-white/15"
-                placeholder="85.5"
-                min="0"
-                max="100"
-                step="0.1"
-                required
-              />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div ref={(el) => (fieldsRef.current[5] = el)}>
+                <label className="mb-1 block text-sm text-white/80">
+                  Classification Percentage
+                </label>
+                <input
+                  type="number"
+                  value={classificationPercentage}
+                  onChange={(e) => setClassificationPercentage(e.target.value)}
+                  className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 outline-none placeholder-white/60 focus:border-white/40 focus:bg-white/15"
+                  placeholder="85.5"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  required
+                />
+              </div>
+
+              <div ref={(el) => (fieldsRef.current[6] = el)}>
+                <label className="mb-1 block text-sm text-white/80">
+                  Price Per Unit (ETH)
+                </label>
+                <input
+                  type="number"
+                  value={pricePerUnit}
+                  onChange={(e) => setPricePerUnit(e.target.value)}
+                  className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 outline-none placeholder-white/60 focus:border-white/40 focus:bg-white/15"
+                  placeholder="0.01"
+                  min="0"
+                  step="0.001"
+                  required
+                />
+              </div>
             </div>
 
-            <div ref={(el) => (fieldsRef.current[6] = el)}>
+            <div ref={(el) => (fieldsRef.current[7] = el)}>
               <label className="mb-1 block text-sm text-white/80">
                 Image URL
               </label>

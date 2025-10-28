@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useNavigate } from "react-router-dom";
 import { getAccessToken } from "../utils/auth";
 import { useAuth } from "../contexts/AuthContext";
+import Loader from "../components/Loader";
+import { SearchBar } from "../components/shared";
+import ArtNotFound from "../components/ArtNotFound";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,15 +16,46 @@ function GalleryPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const rootRef = useRef(null);
   const cardsRef = useRef([]);
   const modalRef = useRef(null);
   const overlayRef = useRef(null);
+  const headerRef = useRef(null);
+  const searchBarRef = useRef(null);
 
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const accessToken = getAccessToken();
+
+  // Filter artworks based on search term
+  const filteredArtworks = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return artworks;
+    }
+
+    const searchLower = searchTerm.toLowerCase();
+    return artworks.filter((artwork) => {
+      const titleMatch = artwork.title?.toLowerCase().includes(searchLower);
+      const artistMatch = artwork.artistName
+        ?.toLowerCase()
+        .includes(searchLower);
+      const categoryMatch = artwork.category
+        ?.toLowerCase()
+        .includes(searchLower);
+      const descriptionMatch = artwork.description
+        ?.toLowerCase()
+        .includes(searchLower);
+
+      return titleMatch || artistMatch || categoryMatch || descriptionMatch;
+    });
+  }, [artworks, searchTerm]);
+
+  // Clear search handler
+  const handleClearSearch = () => {
+    setSearchTerm("");
+  };
 
   // Fetch artworks from API
   useEffect(() => {
@@ -69,34 +103,91 @@ function GalleryPage() {
     fetchArtworks();
   }, [accessToken]);
 
-  // Card animations
+  // Header entrance animation
   useEffect(() => {
-    if (!Array.isArray(artworks) || artworks.length === 0) return;
+    if (loading) return;
+
+    const ctx = gsap.context(() => {
+      if (headerRef.current) {
+        gsap.fromTo(
+          headerRef.current.children,
+          {
+            opacity: 0,
+            y: -30,
+          },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: "power3.out",
+          }
+        );
+      }
+
+      if (searchBarRef.current) {
+        gsap.fromTo(
+          searchBarRef.current,
+          {
+            opacity: 0,
+            scale: 0.95,
+          },
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.6,
+            delay: 0.3,
+            ease: "back.out(1.7)",
+          }
+        );
+      }
+    }, rootRef);
+
+    return () => ctx.revert();
+  }, [loading]);
+
+  // Enhanced Card animations with rotation and scale
+  useEffect(() => {
+    if (!Array.isArray(filteredArtworks) || filteredArtworks.length === 0)
+      return;
 
     const ctx = gsap.context(() => {
       const cards = cardsRef.current.filter(Boolean);
 
+      // Initial entrance animation with stagger
       gsap.fromTo(
         cards,
-        { opacity: 0, scale: 0.96, y: 12 },
+        {
+          opacity: 0,
+          scale: 0.9,
+          y: 30,
+          rotateX: 15,
+        },
         {
           opacity: 1,
           scale: 1,
           y: 0,
-          duration: 0.5,
-          stagger: 0.06,
+          rotateX: 0,
+          duration: 0.8,
+          stagger: 0.08,
           ease: "power3.out",
         }
       );
 
+      // Scroll-triggered animations for each card
       cards.forEach((card) => {
         gsap.fromTo(
           card,
-          { opacity: 0, y: 20 },
+          {
+            opacity: 0,
+            y: 40,
+            scale: 0.95,
+          },
           {
             opacity: 1,
             y: 0,
-            duration: 0.6,
+            scale: 1,
+            duration: 0.7,
             ease: "power3.out",
             scrollTrigger: {
               trigger: card,
@@ -109,7 +200,7 @@ function GalleryPage() {
     }, rootRef);
 
     return () => ctx.revert();
-  }, [artworks]);
+  }, [filteredArtworks]);
 
   // Modal animations
   useEffect(() => {
@@ -157,7 +248,7 @@ function GalleryPage() {
     setTimeout(() => setSelected(null), 300);
   };
 
-  const items = Array.isArray(artworks) ? artworks : [];
+  const items = Array.isArray(filteredArtworks) ? filteredArtworks : [];
 
   return (
     <div
@@ -165,53 +256,136 @@ function GalleryPage() {
       className="min-h-screen w-full bg-gradient-to-br md:mt-[50px] from-zinc-900 via-indigo-950 to-black text-white"
     >
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <header className="mb-6">
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            Art Gallery
-          </h1>
-          <p className="mt-2 text-white/70">
-            Explore curated AI art and creative works.
-          </p>
+        <header ref={headerRef} className="mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-6">
+            <div className="space-y-3">
+              <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
+                Art Gallery ✨
+              </h1>
+              <p className="text-lg text-white/80 max-w-2xl">
+                Explore our curated collection of stunning AI-generated artworks
+                from talented artists worldwide.
+              </p>
+            </div>
+            {/* Search Results Count */}
+            {searchTerm && !loading && (
+              <div className="px-4 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-md rounded-full border border-purple-400/30 text-sm text-white shadow-lg">
+                <span className="font-semibold">{items.length}</span>{" "}
+                {items.length === 1 ? "artwork" : "artworks"} found
+              </div>
+            )}
+          </div>
+
+          {/* Enhanced Search Bar with Gradient Border */}
+          {!loading && (
+            <div ref={searchBarRef} className="max-w-2xl">
+              <div className="relative p-[2px] rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 animate-gradient-x">
+                <div className="bg-zinc-900/90 backdrop-blur-xl rounded-2xl">
+                  <SearchBar
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search by title, artist, category, or description..."
+                    showClearButton={true}
+                    size="lg"
+                    className="border-0 bg-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </header>
 
         {/* Loading */}
-        {loading && (
-          <p className="text-center text-white/70">Loading artworks...</p>
-        )}
+        {loading && <Loader text="Loading artworks..." />}
 
         {/* Error */}
         {error && !loading && (
           <p className="text-center text-red-400">{error}</p>
         )}
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {items.map((art, i) => (
-            <button
-              key={art._id}
-              ref={(el) => (cardsRef.current[i] = el)}
-              onClick={() => openModal(art)}
-              className="group text-left rounded-2xl overflow-hidden bg-white/5 backdrop-blur-md shadow-xl shadow-indigo-950/20 transition-transform will-change-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-white/30"
-            >
-              <div className="relative aspect-[3/2] w-full overflow-hidden bg-black">
-                <img
-                  src={art.image_url}
-                  alt={art.title}
-                  className="h-full w-full object-cover"
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              </div>
-              <div className="p-4">
-                <h3 className="text-lg font-bold">{art.title}</h3>
-                <p className="text-sm text-white/80">{art.artist}</p>
-                <p className="mt-1 text-xs text-white/70">
-                  {art.classification} •{" "}
-                  {Math.round(art.classification_percentage)}%
-                </p>
-              </div>
-            </button>
-          ))}
-        </div>
+        {/* No Results */}
+        {!loading && !error && items.length === 0 && searchTerm && (
+          <ArtNotFound searchTerm={searchTerm} onClear={handleClearSearch} />
+        )}
+
+        {/* Enhanced Grid with Stunning Artistic Cards */}
+        {!loading && !error && items.length > 0 && (
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {items.map((art, i) => (
+              <button
+                key={art._id}
+                ref={(el) => (cardsRef.current[i] = el)}
+                onClick={() => openModal(art)}
+                className="group text-left relative rounded-3xl overflow-hidden bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-lg shadow-2xl shadow-purple-900/30 transition-all duration-500 will-change-transform hover:scale-[1.05] hover:shadow-purple-500/40 hover:shadow-3xl focus:outline-none focus:ring-2 focus:ring-purple-400/50 border border-white/10"
+              >
+                {/* Gradient Border Effect */}
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-indigo-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10" />
+
+                {/* Image Section with Overlay */}
+                <div className="relative aspect-[4/5] w-full overflow-hidden bg-black/50">
+                  <img
+                    src={art.image_url}
+                    alt={art.title}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+
+                  {/* Gradient Overlay */}
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+
+                  {/* Price Badge */}
+                  <div className="absolute top-3 right-3 px-3 py-1.5 bg-gradient-to-r from-emerald-500/90 to-green-500/90 backdrop-blur-md rounded-full text-xs font-bold text-white shadow-lg border border-white/20">
+                    {art.price_per_unit} ETH
+                  </div>
+
+                  {/* Classification Badge */}
+                  <div className="absolute top-3 left-3 px-3 py-1.5 bg-gradient-to-r from-purple-500/90 to-indigo-500/90 backdrop-blur-md rounded-full text-xs font-semibold text-white shadow-lg border border-white/20">
+                    {Math.round(art.classification_percentage)}% Match
+                  </div>
+
+                  {/* Hover Action Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <div className="px-6 py-3 bg-white/20 backdrop-blur-xl rounded-full text-white font-bold shadow-2xl border border-white/30 transform scale-95 group-hover:scale-100 transition-transform duration-500">
+                      View Details ✨
+                    </div>
+                  </div>
+                </div>
+
+                {/* Info Section with Glass Effect */}
+                <div className="p-5 bg-gradient-to-b from-white/5 to-transparent backdrop-blur-sm">
+                  {/* Title */}
+                  <h3 className="text-lg font-bold text-white line-clamp-1 mb-2 group-hover:text-purple-200 transition-colors duration-300">
+                    {art.title}
+                  </h3>
+
+                  {/* Artist */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                      {art.artist ? art.artist.charAt(0).toUpperCase() : "A"}
+                    </div>
+                    <p className="text-sm text-white/90 font-medium line-clamp-1">
+                      {art.artist || "Unknown Artist"}
+                    </p>
+                  </div>
+
+                  {/* Classification and Availability */}
+                  <div className="flex items-center justify-between text-xs text-white/70">
+                    <span className="px-2 py-1 bg-white/10 rounded-full border border-white/20">
+                      {art.classification}
+                    </span>
+                    <span className="font-semibold text-emerald-300">
+                      {art.available} available
+                    </span>
+                  </div>
+                </div>
+
+                {/* Shimmer Effect on Hover */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Modal */}

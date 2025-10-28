@@ -27,108 +27,31 @@ import {
   Cell,
   Legend,
 } from "recharts";
+import {
+  userGrowthData,
+  artworkCategoriesData,
+  recentActivities,
+  dashboardMetrics,
+} from "../data/mockDashboardStats";
 
 const DashboardHome = () => {
-  // ===== Mock Data =====
-  const userGrowthData = [
-    { month: "Jan", users: 1200 },
-    { month: "Feb", users: 1890 },
-    { month: "Mar", users: 2300 },
-    { month: "Apr", users: 2780 },
-    { month: "May", users: 3200 },
-    { month: "Jun", users: 3890 },
-  ];
-
-  const artworkCategoriesData = [
-    { name: "Digital Art", value: 35, color: "#8B5CF6" },
-    { name: "Photography", value: 28, color: "#3B82F6" },
-    { name: "Paintings", value: 20, color: "#06B6D4" },
-    { name: "Sculptures", value: 12, color: "#10B981" },
-    { name: "Mixed Media", value: 5, color: "#A855F7" },
-  ];
-
-  const recentActivities = [
-    {
-      id: 1,
-      time: "2 min ago",
-      action: "Artwork Approved",
-      status: "Success",
-      user: "Alice Johnson",
-    },
-    {
-      id: 2,
-      time: "15 min ago",
-      action: "New User Registered",
-      status: "Success",
-      user: "Bob Smith",
-    },
-    {
-      id: 3,
-      time: "1 hour ago",
-      action: "Token Transaction",
-      status: "Success",
-      user: "Carol Davis",
-    },
-    {
-      id: 4,
-      time: "2 hours ago",
-      action: "Artwork Pending Review",
-      status: "Pending",
-      user: "David Wilson",
-    },
-    {
-      id: 5,
-      time: "3 hours ago",
-      action: "Revenue Generated",
-      status: "Success",
-      user: "Emma Brown",
-    },
-  ];
-
-  const metrics = [
-    {
-      title: "Total Users",
-      value: "12,847",
-      icon: Users,
-      gradient: "from-blue-500 to-purple-600",
-      change: "+12%",
-    },
-    {
-      title: "Total Artists",
-      value: "3,264",
-      icon: Palette,
-      gradient: "from-purple-500 to-pink-600",
-      change: "+8%",
-    },
-    {
-      title: "Artworks Uploaded",
-      value: "48,592",
-      icon: Image,
-      gradient: "from-blue-600 to-cyan-500",
-      change: "+23%",
-    },
-    {
-      title: "Tokens in Circulation",
-      value: "1.2M",
-      icon: Coins,
-      gradient: "from-purple-600 to-blue-500",
-      change: "+15%",
-    },
-    {
-      title: "Pending Approvals",
-      value: "127",
-      icon: Clock,
-      gradient: "from-orange-500 to-red-500",
-      change: "-5%",
-    },
-    {
-      title: "Revenue Summary",
-      value: "$84,290",
-      icon: DollarSign,
-      gradient: "from-green-500 to-emerald-600",
-      change: "+18%",
-    },
-  ];
+  // ===== Mock Data imported from centralized location =====
+  const metrics = dashboardMetrics.map((metric, index) => {
+    const icons = [Users, Palette, Image, DollarSign, Clock, Coins];
+    const gradients = [
+      "from-blue-500 to-purple-600",
+      "from-purple-500 to-pink-600",
+      "from-blue-600 to-cyan-500",
+      "from-purple-600 to-blue-500",
+      "from-orange-500 to-red-500",
+      "from-green-500 to-emerald-600",
+    ];
+    return {
+      ...metric,
+      icon: icons[index],
+      gradient: gradients[index],
+    };
+  });
 
   // ===== Components =====
   const MetricCard = ({ title, value, icon: Icon, gradient, change }) => (

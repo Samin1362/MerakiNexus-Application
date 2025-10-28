@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { getAccessToken } from "../utils/auth";
+import Loader from "../components/Loader";
 import {
   User,
   ShoppingBag,
@@ -104,16 +105,7 @@ const UserDashboard = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-700 to-indigo-800 flex items-center justify-center">
-        <div className="text-center text-white">
-          <div className="w-16 h-16 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
-            <Package className="w-8 h-8" />
-          </div>
-          <p className="text-lg font-medium">Loading your collection...</p>
-        </div>
-      </div>
-    );
+    return <Loader text="Loading your collection..." />;
   }
 
   return (

@@ -38,19 +38,26 @@ export const storeTokens = (
   userData = null
 ) => {
   try {
+    // Check if we're on HTTPS (production) or HTTP (development)
+    const isProduction = window.location.protocol === "https:";
+
+    // Cookie configuration - secure only on HTTPS for Safari compatibility
+    const cookieConfig = {
+      secure: isProduction, // ✅ Only secure on HTTPS
+      sameSite: "lax", // ✅ More compatible with Safari while still secure
+    };
+
     // Store access token with 7 days expiry
     Cookies.set("merakiNexus_accessToken", accessToken, {
       expires: 7,
-      secure: true,
-      sameSite: "strict",
+      ...cookieConfig,
     });
 
     if (refreshToken) {
       // Store refresh token with 30 days expiry
       Cookies.set("merakiNexus_refreshToken", refreshToken, {
         expires: 30,
-        secure: true,
-        sameSite: "strict",
+        ...cookieConfig,
       });
     }
 
@@ -58,8 +65,15 @@ export const storeTokens = (
     if (userData) {
       localStorage.setItem("merakiNexus_userData", JSON.stringify(userData));
     }
+
+    console.log("✅ Tokens stored successfully", {
+      isProduction,
+      cookieConfig,
+      accessTokenStored: !!accessToken,
+      refreshTokenStored: !!refreshToken,
+    });
   } catch (error) {
-    console.error("Error storing tokens:", error);
+    console.error("❌ Error storing tokens:", error);
   }
 };
 

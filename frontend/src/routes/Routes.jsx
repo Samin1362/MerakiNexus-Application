@@ -23,12 +23,10 @@ import DashboardSettings from "../pages/DashboardSettings";
 import DashboardUsers from "../pages/DashboardUsers";
 
 // Artist Dashboard Components
-import ArtistDashboardLayout from "../components/ArtistDashboardLayout";
 import ArtistHome from "../pages/ArtistHome";
-import MyArtworks from "../components/MyArtworks";
 
 // Protected Route Components
-import {
+import ProtectedRoute, {
   AdminRoute,
   ArtistRoute,
   UserRoute,
@@ -158,7 +156,6 @@ export const ROUTES = {
   // Artist Dashboard Routes
   ARTIST: {
     DASHBOARD: "/artist-dashboard",
-    MY_ARTWORKS: "/artist-dashboard/my-artworks",
   },
 
   // Error Routes
@@ -182,7 +179,11 @@ const router = createBrowserRouter([
       },
       {
         path: ROUTES.UPLOAD,
-        element: <UploadPage />,
+        element: (
+          <ProtectedRoute allowedRoles={["Artist", "Admin"]}>
+            <UploadPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: ROUTES.ABOUT,
@@ -251,24 +252,14 @@ const router = createBrowserRouter([
         ],
       },
 
-      // Artist Dashboard Routes (Protected)
+      // Artist Dashboard Route (Protected) - Single Page
       {
         path: ROUTES.ARTIST.DASHBOARD,
         element: (
           <ArtistRoute>
-            <ArtistDashboardLayout />
+            <ArtistHome />
           </ArtistRoute>
         ),
-        children: [
-          {
-            index: true,
-            element: <ArtistHome />,
-          },
-          {
-            path: "my-artworks",
-            element: <MyArtworks />,
-          },
-        ],
       },
 
       // 404 Not Found Route

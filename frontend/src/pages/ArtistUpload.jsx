@@ -8,7 +8,7 @@ const ArtistUpload = () => {
   const formRef = useRef(null);
   const fieldsRef = useRef([]);
   const submitRef = useRef(null);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
@@ -75,10 +75,6 @@ const ArtistUpload = () => {
   const onSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("🚀 UPLOAD STARTED - Debug Information:");
-    console.log("📊 isAuthenticated:", isAuthenticated);
-    console.log("👤 user from AuthContext:", user);
-
     if (!isAuthenticated) {
       alert("You must be logged in to upload artwork. Please login first.");
       return;
@@ -105,10 +101,6 @@ const ArtistUpload = () => {
     try {
       // Get access token from cookies
       const accessToken = getAccessToken();
-      console.log(
-        "🔑 Access token retrieved:",
-        accessToken ? "✅ Found" : "❌ Not found"
-      );
 
       if (!accessToken) {
         alert("Authentication token not found. Please login again.");
@@ -118,10 +110,6 @@ const ArtistUpload = () => {
 
       // Remove "Bearer " prefix if it exists, API expects just the token
       const authToken = accessToken.replace(/^Bearer\s+/i, "");
-      console.log(
-        "🔧 Processed auth token:",
-        authToken ? "✅ Processed" : "❌ Empty"
-      );
 
       // Prepare the artwork data
       const artworkData = {
@@ -146,8 +134,6 @@ const ArtistUpload = () => {
         },
       };
 
-      console.log("📦 Artwork payload:", artworkData);
-
       const response = await fetch(
         "https://meraki-nexus-api.vercel.app/meraki-nexus-api/nexus/upload",
         {
@@ -160,20 +146,9 @@ const ArtistUpload = () => {
         }
       );
 
-      console.log("📡 Response status:", response.status);
-      console.log("📡 Response status text:", response.statusText);
-
       const data = await response.json();
-      console.log("📥 Response data:", data);
-      console.log(
-        "📥 Response headers:",
-        Object.fromEntries(response.headers.entries())
-      );
 
       if (response.ok && data.success === true && data.statusCode === 201) {
-        console.log("✅ Artwork created successfully!");
-        console.log("🎨 Artwork ID:", data.data._id);
-
         setShowSuccess(true);
         requestAnimationFrame(() => {
           const tl = gsap.timeline();
@@ -197,23 +172,17 @@ const ArtistUpload = () => {
             );
         });
       } else {
-        console.error("❌ API Error Response:", data);
-
         if (response.status === 401) {
-          console.error("❌ 401 Unauthorized - Token is invalid or expired");
           alert("Your session is invalid or expired. Please login again.");
         } else if (response.status === 403) {
-          console.error("❌ 403 Forbidden - Insufficient permissions");
           alert("You don't have permission to upload artwork.");
         } else if (data.message?.includes("invalid token")) {
-          console.error("❌ Invalid token error");
           alert("Authentication token is invalid. Please login again.");
         } else {
           alert(`Failed to submit artwork: ${data.message || "Unknown error"}`);
         }
       }
-    } catch (error) {
-      console.error("❌ Network/API Error:", error);
+    } catch {
       alert("Unable to connect to server. Please try again.");
     } finally {
       setIsSubmitting(false);

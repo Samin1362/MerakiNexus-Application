@@ -38,10 +38,8 @@ function GalleryPage() {
     const searchLower = searchTerm.toLowerCase();
     return artworks.filter((artwork) => {
       const titleMatch = artwork.title?.toLowerCase().includes(searchLower);
-      const artistMatch = artwork.artistName
-        ?.toLowerCase()
-        .includes(searchLower);
-      const categoryMatch = artwork.category
+      const artistMatch = artwork.artist?.toLowerCase().includes(searchLower);
+      const categoryMatch = artwork.classification
         ?.toLowerCase()
         .includes(searchLower);
       const descriptionMatch = artwork.description

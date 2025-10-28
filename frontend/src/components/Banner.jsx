@@ -119,7 +119,7 @@ const Banner = () => {
     return () => ctx.revert();
   }, []);
 
-  // Slide transition animation
+  // Smooth horizontal swipe transition
   const animateSlideTransition = useCallback(
     (direction) => {
       if (isAnimating) return;
@@ -129,25 +129,26 @@ const Banner = () => {
         onComplete: () => setIsAnimating(false),
       });
 
+      const slideDirection = direction === "next" ? 1 : -1;
+
       // Animate out current content
       timeline.to(contentRef.current.children, {
         opacity: 0,
-        y: direction === "next" ? -30 : 30,
-        duration: 0.4,
+        x: -50 * slideDirection,
+        duration: 0.5,
         stagger: 0.05,
         ease: "power2.in",
       });
 
-      // Animate out image
+      // Slide out current image (to left for next, to right for prev)
       timeline.to(
         slideRef.current,
         {
-          opacity: 0,
-          scale: 0.95,
-          duration: 0.5,
+          x: -100 * slideDirection + "%",
+          duration: 0.8,
           ease: "power2.inOut",
         },
-        "<0.2"
+        "<0.1"
       );
 
       // Change slide
@@ -159,20 +160,21 @@ const Banner = () => {
         }
       });
 
-      // Animate in new image
-      timeline.fromTo(
-        slideRef.current,
-        { opacity: 0, scale: 1.1 },
-        { opacity: 1, scale: 1, duration: 0.8, ease: "power3.out" }
-      );
+      // Reset position and slide in new image (from right for next, from left for prev)
+      timeline.set(slideRef.current, { x: 100 * slideDirection + "%" });
+      timeline.to(slideRef.current, {
+        x: "0%",
+        duration: 0.8,
+        ease: "power2.out",
+      });
 
       // Animate in new content
       timeline.fromTo(
         contentRef.current.children,
-        { opacity: 0, y: direction === "next" ? 30 : -30 },
+        { opacity: 0, x: 50 * slideDirection },
         {
           opacity: 1,
-          y: 0,
+          x: 0,
           duration: 0.6,
           stagger: 0.1,
           ease: "power3.out",
@@ -209,35 +211,49 @@ const Banner = () => {
 
     setIsAnimating(true);
 
+    const direction = index > currentSlide ? 1 : -1;
+
+    // Animate out current content
     timeline.to(contentRef.current.children, {
       opacity: 0,
-      y: -20,
-      duration: 0.3,
+      x: -30 * direction,
+      duration: 0.4,
       stagger: 0.03,
+      ease: "power2.in",
     });
 
+    // Slide out current image
     timeline.to(
       slideRef.current,
       {
-        opacity: 0,
-        scale: 0.95,
-        duration: 0.4,
+        x: -100 * direction + "%",
+        duration: 0.7,
+        ease: "power2.inOut",
       },
       "<0.1"
     );
 
     timeline.call(() => setCurrentSlide(index));
 
-    timeline.fromTo(
-      slideRef.current,
-      { opacity: 0, scale: 1.05 },
-      { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }
-    );
+    // Reset and slide in new image
+    timeline.set(slideRef.current, { x: 100 * direction + "%" });
+    timeline.to(slideRef.current, {
+      x: "0%",
+      duration: 0.7,
+      ease: "power2.out",
+    });
 
+    // Animate in new content
     timeline.fromTo(
       contentRef.current.children,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power2.out" },
+      { opacity: 0, x: 30 * direction },
+      {
+        opacity: 1,
+        x: 0,
+        duration: 0.5,
+        stagger: 0.08,
+        ease: "power2.out",
+      },
       "<0.2"
     );
   };

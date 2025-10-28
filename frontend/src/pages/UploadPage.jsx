@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
+import { useNavigate } from "react-router-dom";
 import { getAccessToken } from "../utils/auth";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../components/Toast/useToast";
 
 function UploadPage() {
   const rootRef = useRef(null);
@@ -9,6 +11,8 @@ function UploadPage() {
   const fieldsRef = useRef([]);
   const submitRef = useRef(null);
   const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+  const toast = useToast();
 
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
@@ -21,10 +25,6 @@ function UploadPage() {
   const [imagePreview, setImagePreview] = useState("");
   const [imageError, setImageError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [showSuccess, setShowSuccess] = useState(false);
-  const successRef = useRef(null);
-  const overlayRef = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -177,28 +177,13 @@ function UploadPage() {
         console.log("✅ Artwork created successfully!");
         console.log("🎨 Artwork ID:", data.data._id);
 
-        setShowSuccess(true);
-        requestAnimationFrame(() => {
-          const tl = gsap.timeline();
-          tl.set(overlayRef.current, { pointerEvents: "auto" })
-            .fromTo(
-              overlayRef.current,
-              { opacity: 0 },
-              { opacity: 1, duration: 0.2, ease: "power2.out" }
-            )
-            .fromTo(
-              successRef.current,
-              { opacity: 0, scale: 0.96, y: 8 },
-              {
-                opacity: 1,
-                scale: 1,
-                y: 0,
-                duration: 0.25,
-                ease: "power3.out",
-              },
-              "<"
-            );
-        });
+        // Show success toast
+        toast.success("🎨 Artwork uploaded successfully!", 4000);
+
+        // Redirect to gallery page after a short delay
+        setTimeout(() => {
+          navigate("/gallery");
+        }, 500);
       } else {
         console.error("❌ API Error Response:", data);
 
@@ -221,29 +206,6 @@ function UploadPage() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const closeSuccess = () => {
-    const tl = gsap.timeline({
-      onComplete: () => setShowSuccess(false),
-    });
-    tl.to(successRef.current, {
-      opacity: 0,
-      scale: 0.97,
-      y: 8,
-      duration: 0.2,
-      ease: "power2.in",
-    }).to(
-      overlayRef.current,
-      {
-        opacity: 0,
-        duration: 0.2,
-        ease: "power2.in",
-        onComplete: () =>
-          gsap.set(overlayRef.current, { pointerEvents: "none" }),
-      },
-      "<"
-    );
   };
 
   return (
@@ -443,33 +405,6 @@ function UploadPage() {
             </div>
           </div>
         </form>
-      </div>
-
-      {/* Success overlay */}
-      <div
-        ref={overlayRef}
-        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm ${
-          showSuccess ? "" : "pointer-events-none opacity-0"
-        }`}
-        onClick={closeSuccess}
-      >
-        <div
-          ref={successRef}
-          className="relative mx-4 w-full max-w-md rounded-2xl bg-zinc-900 p-6 text-white shadow-2xl"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            className="absolute right-3 top-3 rounded-md p-2 text-white/80 hover:bg-white/10"
-            onClick={closeSuccess}
-            aria-label="Close"
-          >
-            ×
-          </button>
-          <h3 className="text-2xl font-bold">Submitted!</h3>
-          <p className="mt-2 text-white/80">
-            Your artwork has been received. AI insights will appear soon.
-          </p>
-        </div>
       </div>
     </div>
   );

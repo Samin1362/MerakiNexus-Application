@@ -11,6 +11,7 @@ import {
   ArrowRight,
   ExternalLink,
 } from "lucide-react";
+import Banner from "../components/Banner";
 
 // Memoized Artwork Card Component
 const ArtworkCard = memo(({ artwork }) => (
@@ -102,10 +103,6 @@ function HomePage() {
     window.location.href = "/gallery";
   };
 
-  const handleLearnMore = () => {
-    window.location.href = "/about";
-  };
-
   // Load featured artworks
   useEffect(() => {
     const loadArtworks = async () => {
@@ -169,86 +166,11 @@ function HomePage() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-[300px] w-[300px] rounded-full bg-cyan-400/8 blur-2xl" />
       </div>
 
+      {/* Hero Section */}
+      <Banner />
+
       {/* Main content container */}
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-20 sm:px-8 lg:px-12 space-y-24">
-        {/* Hero Section */}
-        <section className="grid items-center gap-16 lg:grid-cols-2">
-          <div className="text-center lg:text-left space-y-10">
-            {/* Hero headline */}
-            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tight">
-              <span className="bg-gradient-to-r from-white via-purple-100 to-indigo-200 bg-clip-text text-transparent drop-shadow-2xl leading-tight">
-                Welcome
-              </span>
-            </h1>
-
-            {/* Hero description */}
-            <p className="text-xl sm:text-2xl lg:text-3xl text-white/90 max-w-3xl mx-auto lg:mx-0 leading-relaxed font-light">
-              <span className="font-bold text-white">MerakiNexus</span> is where
-              AI-driven creativity meets Web3 innovation. Artists showcase their
-              masterpieces while AI evaluates style and value, and blockchain
-              ensures secure, transparent ownership.
-            </p>
-
-            {/* CTA buttons */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start">
-              <button
-                onClick={navigateToGallery}
-                className="group relative overflow-hidden rounded-3xl bg-white/12 backdrop-blur-xl px-10 py-5 text-white shadow-2xl shadow-indigo-900/25 border border-white/25 transition-all duration-500 hover:bg-white/18 hover:scale-105 hover:shadow-purple-500/35 focus:outline-none focus:ring-4 focus:ring-white/30"
-              >
-                {/* Button shimmer effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] transition-transform duration-1000 group-hover:translate-x-[200%]" />
-
-                <div className="relative flex items-center gap-3 font-bold text-lg">
-                  <Sparkles className="w-6 h-6" />
-                  Explore Gallery
-                  <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-2" />
-                </div>
-              </button>
-
-              <button
-                onClick={handleLearnMore}
-                className="group rounded-3xl border-2 border-white/30 backdrop-blur-sm px-10 py-5 text-white transition-all duration-500 hover:bg-white/15 hover:scale-105 hover:border-white/50 focus:outline-none focus:ring-4 focus:ring-white/30"
-              >
-                <div className="flex items-center gap-3 font-bold text-lg">
-                  <ExternalLink className="w-5 h-5" />
-                  Learn More
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* Hero visual card */}
-          <div className="relative mx-auto w-full max-w-2xl">
-            <div className="group relative overflow-hidden rounded-[2rem] border-2 border-white/25 bg-white/10 backdrop-blur-xl shadow-2xl shadow-indigo-950/40 transition-all duration-700 hover:scale-105 hover:rotate-1 hover:shadow-purple-500/30">
-              {/* Animated border glow */}
-              <div className="absolute -inset-1 rounded-[2rem] bg-gradient-to-r from-fuchsia-400/25 via-cyan-300/25 to-indigo-400/25 blur-xl opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
-
-              <div className="relative">
-                <img
-                  src="https://images.unsplash.com/photo-1752649935031-7c35f43b24b0?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nzh8fGNyZWF0aXZlJTIwYXJ0d29ya3xlbnwwfHwwfHx8MA%3D%3D"
-                  alt="AI creativity showcase"
-                  className="w-full h-96 object-cover rounded-[2rem] transition-transform duration-1000 group-hover:scale-110"
-                />
-
-                {/* Overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-purple-900/60 via-transparent to-transparent rounded-[2rem]" />
-
-                {/* Floating info card */}
-                <div className="absolute bottom-8 left-8 right-8 transform transition-all duration-500 group-hover:translate-y-[-4px]">
-                  <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl">
-                    <h3 className="text-gray-900 font-bold text-xl">
-                      AI-Powered Creativity
-                    </h3>
-                    <p className="text-gray-700 mt-2">
-                      Where artistic vision meets cutting-edge technology
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* About Section */}
         <section className="space-y-16">
           <div className="text-center space-y-4">

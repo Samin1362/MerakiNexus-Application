@@ -1,10 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useMemo } from 'react';
-import { 
-  Search, 
+import React, { useState, useMemo } from "react";
+import {
+  Search,
   Filter,
-  Check, 
-  X, 
+  Check,
+  X,
   Eye,
   Clock,
   CheckCircle,
@@ -17,158 +17,18 @@ import {
   User,
   Shield,
   Star,
-  Camera
-} from 'lucide-react';
+  Camera,
+} from "lucide-react";
+import {
+  mockPendingArtworks,
+  mockUserRequests,
+  mockRecentActivities,
+} from "../data/mockApprovals";
 
 const DashboardApprovals = () => {
-  // Mock data for pending artworks
-  
-  const mockPendingArtworks = [
-    {
-      id: 'ART-001',
-      title: 'Cosmic Dreams',
-      artist: {
-        name: 'Luna Martinez',
-        email: 'luna@example.com',
-        avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=face'
-      },
-      thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&h=150&fit=crop',
-      dateSubmitted: '2024-09-12',
-      status: 'Pending Review',
-      category: 'Digital Art',
-      description: 'A mesmerizing digital artwork exploring cosmic themes and celestial beauty.'
-    },
-    {
-      id: 'ART-002',
-      title: 'Urban Symphony',
-      artist: {
-        name: 'Carlos Rivera',
-        email: 'carlos@example.com',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face'
-      },
-      thumbnail: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=200&h=150&fit=crop',
-      dateSubmitted: '2024-09-11',
-      status: 'Under Review',
-      category: 'Street Art',
-      description: 'Vibrant street art capturing the rhythm and energy of urban life.'
-    },
-    {
-      id: 'ART-003',
-      title: 'Nature\'s Embrace',
-      artist: {
-        name: 'Emma Thompson',
-        email: 'emma@example.com',
-        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face'
-      },
-      thumbnail: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=200&h=150&fit=crop',
-      dateSubmitted: '2024-09-10',
-      status: 'Pending Review',
-      category: 'Photography',
-      description: 'Stunning nature photography showcasing the raw beauty of wilderness.'
-    },
-    {
-      id: 'ART-004',
-      title: 'Abstract Emotions',
-      artist: {
-        name: 'David Chen',
-        email: 'david@example.com',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
-      },
-      thumbnail: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&h=150&fit=crop',
-      dateSubmitted: '2024-09-09',
-      status: 'Under Review',
-      category: 'Abstract',
-      description: 'An abstract composition exploring human emotions through color and form.'
-    }
-  ];
-
-  // Mock data for user requests
-  const mockUserRequests = [
-    {
-      id: 'USER-001',
-      user: {
-        name: 'Sarah Wilson',
-        email: 'sarah@example.com',
-        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b789?w=100&h=100&fit=crop&crop=face'
-      },
-      requestType: 'Artist Verification',
-      date: '2024-09-12',
-      status: 'Pending',
-      details: 'Requesting verification as a professional artist with portfolio review.'
-    },
-    {
-      id: 'USER-002',
-      user: {
-        name: 'Michael Brown',
-        email: 'michael@example.com',
-        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face'
-      },
-      requestType: 'Profile Update',
-      date: '2024-09-11',
-      status: 'Under Review',
-      details: 'Requesting approval for updated profile information and credentials.'
-    },
-    {
-      id: 'USER-003',
-      user: {
-        name: 'Lisa Garcia',
-        email: 'lisa@example.com',
-        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face'
-      },
-      requestType: 'Premium Account',
-      date: '2024-09-10',
-      status: 'Pending',
-      details: 'Application for premium account upgrade with enhanced features.'
-    }
-  ];
-
-  // Mock recent activities
-  const mockRecentActivities = [
-    {
-      id: 1,
-      type: 'approved',
-      item: 'Sunset Serenity',
-      user: {
-        name: 'Alice Johnson',
-        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b789?w=100&h=100&fit=crop&crop=face'
-      },
-      timestamp: '2 hours ago'
-    },
-    {
-      id: 2,
-      type: 'rejected',
-      item: 'Digital Chaos',
-      user: {
-        name: 'Bob Smith',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face'
-      },
-      timestamp: '4 hours ago'
-    },
-    {
-      id: 3,
-      type: 'approved',
-      item: 'Artist Verification',
-      user: {
-        name: 'Carol Davis',
-        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face'
-      },
-      timestamp: '6 hours ago'
-    },
-    {
-      id: 4,
-      type: 'approved',
-      item: 'Premium Upgrade',
-      user: {
-        name: 'Alex Thompson',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
-      },
-      timestamp: '8 hours ago'
-    }
-  ];
-
   // State management
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('All');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("All");
   const [selectedItem, setSelectedItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -178,24 +38,26 @@ const DashboardApprovals = () => {
     const pendingUsers = mockUserRequests.length;
     const approvalsToday = 12; // Mock data
     const rejectionsToday = 3; // Mock data
-    
+
     return { pendingArtworks, pendingUsers, approvalsToday, rejectionsToday };
   }, []);
 
   // Filter logic
   const filteredArtworks = useMemo(() => {
-    if (filterType === 'Users') return [];
-    return mockPendingArtworks.filter(artwork => 
-      artwork.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      artwork.artist.name.toLowerCase().includes(searchTerm.toLowerCase())
+    if (filterType === "Users") return [];
+    return mockPendingArtworks.filter(
+      (artwork) =>
+        artwork.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        artwork.artist.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [searchTerm, filterType]);
 
   const filteredUsers = useMemo(() => {
-    if (filterType === 'Artworks') return [];
-    return mockUserRequests.filter(request =>
-      request.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.requestType.toLowerCase().includes(searchTerm.toLowerCase())
+    if (filterType === "Artworks") return [];
+    return mockUserRequests.filter(
+      (request) =>
+        request.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        request.requestType.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [searchTerm, filterType]);
 
@@ -228,7 +90,9 @@ const DashboardApprovals = () => {
           <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
             Approvals Management
           </h1>
-          <p className="text-gray-600">Review and manage pending approvals for artworks and user requests</p>
+          <p className="text-gray-600">
+            Review and manage pending approvals for artworks and user requests
+          </p>
         </div>
 
         {/* Summary Cards */}
@@ -236,8 +100,12 @@ const DashboardApprovals = () => {
           <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Pending Artworks</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{stats.pendingArtworks}</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  Pending Artworks
+                </p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
+                  {stats.pendingArtworks}
+                </p>
                 <p className="text-xs text-blue-600 mt-1">Awaiting review</p>
               </div>
               <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-3 rounded-lg">
@@ -245,12 +113,16 @@ const DashboardApprovals = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">User Requests</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{stats.pendingUsers}</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  User Requests
+                </p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
+                  {stats.pendingUsers}
+                </p>
                 <p className="text-xs text-purple-600 mt-1">Pending approval</p>
               </div>
               <div className="bg-gradient-to-br from-purple-500 to-pink-600 p-3 rounded-lg">
@@ -258,12 +130,16 @@ const DashboardApprovals = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Approvals Today</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{stats.approvalsToday}</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  Approvals Today
+                </p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
+                  {stats.approvalsToday}
+                </p>
                 <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
                   <TrendingUp className="h-3 w-3" />
                   +8% from yesterday
@@ -274,12 +150,16 @@ const DashboardApprovals = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Rejections Today</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{stats.rejectionsToday}</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  Rejections Today
+                </p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
+                  {stats.rejectionsToday}
+                </p>
                 <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
                   <TrendingDown className="h-3 w-3" />
                   -2% from yesterday
@@ -306,7 +186,7 @@ const DashboardApprovals = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <Filter className="h-5 w-5 text-gray-400" />
                 <select
@@ -327,7 +207,7 @@ const DashboardApprovals = () => {
           {/* Main Content */}
           <div className="xl:col-span-3 space-y-6">
             {/* Pending Artworks */}
-            {(filterType === 'All' || filterType === 'Artworks') && (
+            {(filterType === "All" || filterType === "Artworks") && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
                   <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -335,51 +215,74 @@ const DashboardApprovals = () => {
                     Pending Artwork Approvals ({filteredArtworks.length})
                   </h2>
                 </div>
-                
+
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Artwork</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Artist</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Submitted</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Artwork
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Artist
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Date Submitted
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                       {filteredArtworks.map((artwork) => (
-                        <tr key={artwork.id} className="hover:bg-gray-50 transition-colors duration-200">
+                        <tr
+                          key={artwork.id}
+                          className="hover:bg-gray-50 transition-colors duration-200"
+                        >
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-4">
-                              <img 
-                                src={artwork.thumbnail} 
+                              <img
+                                src={artwork.thumbnail}
                                 alt={artwork.title}
                                 className="w-16 h-12 object-cover rounded-lg shadow-sm"
                               />
                               <div>
-                                <p className="text-sm font-semibold text-gray-900">{artwork.title}</p>
-                                <p className="text-xs text-gray-500">{artwork.category}</p>
+                                <p className="text-sm font-semibold text-gray-900">
+                                  {artwork.title}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {artwork.category}
+                                </p>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <img 
-                                src={artwork.artist.avatar} 
+                              <img
+                                src={artwork.artist.avatar}
                                 alt={artwork.artist.name}
                                 className="w-8 h-8 rounded-full object-cover"
                               />
                               <div>
-                                <p className="text-sm font-medium text-gray-900">{artwork.artist.name}</p>
-                                <p className="text-xs text-gray-500">{artwork.artist.email}</p>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {artwork.artist.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {artwork.artist.email}
+                                </p>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm text-gray-600">{artwork.dateSubmitted}</span>
+                              <span className="text-sm text-gray-600">
+                                {artwork.dateSubmitted}
+                              </span>
                             </div>
                           </td>
                           <td className="px-6 py-4">
@@ -390,22 +293,26 @@ const DashboardApprovals = () => {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex gap-2">
-                              <button 
-                                onClick={() => openModal(artwork, 'artwork')}
+                              <button
+                                onClick={() => openModal(artwork, "artwork")}
                                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
                                 title="View Details"
                               >
                                 <Eye className="h-4 w-4" />
                               </button>
-                              <button 
-                                onClick={() => handleArtworkAction('approve', artwork.id)}
+                              <button
+                                onClick={() =>
+                                  handleArtworkAction("approve", artwork.id)
+                                }
                                 className="px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg transition-all duration-200 flex items-center gap-1 text-sm font-medium"
                               >
                                 <Check className="h-4 w-4" />
                                 Approve
                               </button>
-                              <button 
-                                onClick={() => handleArtworkAction('reject', artwork.id)}
+                              <button
+                                onClick={() =>
+                                  handleArtworkAction("reject", artwork.id)
+                                }
                                 className="px-3 py-2 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-lg transition-all duration-200 flex items-center gap-1 text-sm font-medium"
                               >
                                 <X className="h-4 w-4" />
@@ -422,7 +329,7 @@ const DashboardApprovals = () => {
             )}
 
             {/* User Requests */}
-            {(filterType === 'All' || filterType === 'Users') && (
+            {(filterType === "All" || filterType === "Users") && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50">
                   <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -430,46 +337,74 @@ const DashboardApprovals = () => {
                     User Requests ({filteredUsers.length})
                   </h2>
                 </div>
-                
+
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request Type</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          User
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Request Type
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Date
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                       {filteredUsers.map((request) => (
-                        <tr key={request.id} className="hover:bg-gray-50 transition-colors duration-200">
+                        <tr
+                          key={request.id}
+                          className="hover:bg-gray-50 transition-colors duration-200"
+                        >
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <img 
-                                src={request.user.avatar} 
+                              <img
+                                src={request.user.avatar}
                                 alt={request.user.name}
                                 className="w-10 h-10 rounded-full object-cover shadow-sm"
                               />
                               <div>
-                                <p className="text-sm font-semibold text-gray-900">{request.user.name}</p>
-                                <p className="text-xs text-gray-500">{request.user.email}</p>
+                                <p className="text-sm font-semibold text-gray-900">
+                                  {request.user.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {request.user.email}
+                                </p>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              {request.requestType === 'Artist Verification' && <Shield className="h-4 w-4 text-blue-500" />}
-                              {request.requestType === 'Profile Update' && <User className="h-4 w-4 text-green-500" />}
-                              {request.requestType === 'Premium Account' && <Star className="h-4 w-4 text-purple-500" />}
-                              <span className="text-sm font-medium text-gray-900">{request.requestType}</span>
+                              {request.requestType ===
+                                "Artist Verification" && (
+                                <Shield className="h-4 w-4 text-blue-500" />
+                              )}
+                              {request.requestType === "Profile Update" && (
+                                <User className="h-4 w-4 text-green-500" />
+                              )}
+                              {request.requestType === "Premium Account" && (
+                                <Star className="h-4 w-4 text-purple-500" />
+                              )}
+                              <span className="text-sm font-medium text-gray-900">
+                                {request.requestType}
+                              </span>
                             </div>
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm text-gray-600">{request.date}</span>
+                              <span className="text-sm text-gray-600">
+                                {request.date}
+                              </span>
                             </div>
                           </td>
                           <td className="px-6 py-4">
@@ -480,22 +415,26 @@ const DashboardApprovals = () => {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex gap-2">
-                              <button 
-                                onClick={() => openModal(request, 'user')}
+                              <button
+                                onClick={() => openModal(request, "user")}
                                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
                                 title="View Details"
                               >
                                 <Eye className="h-4 w-4" />
                               </button>
-                              <button 
-                                onClick={() => handleUserAction('approve', request.id)}
+                              <button
+                                onClick={() =>
+                                  handleUserAction("approve", request.id)
+                                }
                                 className="px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg transition-all duration-200 flex items-center gap-1 text-sm font-medium"
                               >
                                 <Check className="h-4 w-4" />
                                 Approve
                               </button>
-                              <button 
-                                onClick={() => handleUserAction('reject', request.id)}
+                              <button
+                                onClick={() =>
+                                  handleUserAction("reject", request.id)
+                                }
                                 className="px-3 py-2 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-lg transition-all duration-200 flex items-center gap-1 text-sm font-medium"
                               >
                                 <X className="h-4 w-4" />
@@ -519,36 +458,49 @@ const DashboardApprovals = () => {
                 <Clock className="h-5 w-5" />
                 Recent Activity
               </h3>
-              
+
               <div className="space-y-4">
                 {mockRecentActivities.map((activity) => (
-                  <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-                    <img 
-                      src={activity.user.avatar} 
+                  <div
+                    key={activity.id}
+                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    <img
+                      src={activity.user.avatar}
                       alt={activity.user.name}
                       className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        {activity.type === 'approved' ? (
+                        {activity.type === "approved" ? (
                           <CheckCircle className="h-4 w-4 text-green-500" />
                         ) : (
                           <XCircle className="h-4 w-4 text-red-500" />
                         )}
-                        <span className={`text-xs font-semibold ${
-                          activity.type === 'approved' ? 'text-green-600' : 'text-red-600'
-                        }`}>
+                        <span
+                          className={`text-xs font-semibold ${
+                            activity.type === "approved"
+                              ? "text-green-600"
+                              : "text-red-600"
+                          }`}
+                        >
                           {activity.type.toUpperCase()}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-900 font-medium truncate">{activity.item}</p>
-                      <p className="text-xs text-gray-500">by {activity.user.name}</p>
-                      <p className="text-xs text-gray-400 mt-1">{activity.timestamp}</p>
+                      <p className="text-sm text-gray-900 font-medium truncate">
+                        {activity.item}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        by {activity.user.name}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {activity.timestamp}
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
-              
+
               <button className="w-full mt-4 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200 text-sm font-medium">
                 View All Activities
               </button>
@@ -563,61 +515,83 @@ const DashboardApprovals = () => {
               <div className="p-6 sm:p-8">
                 <div className="flex justify-between items-start mb-6">
                   <h2 className="text-2xl font-bold text-gray-900">
-                    {selectedItem.type === 'artwork' ? 'Artwork Details' : 'User Request Details'}
+                    {selectedItem.type === "artwork"
+                      ? "Artwork Details"
+                      : "User Request Details"}
                   </h2>
-                  <button 
+                  <button
                     onClick={closeModal}
                     className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                   >
                     <X className="h-6 w-6" />
                   </button>
                 </div>
-                
-                {selectedItem.type === 'artwork' ? (
+
+                {selectedItem.type === "artwork" ? (
                   <div className="space-y-6">
                     <div className="flex gap-6">
-                      <img 
-                        src={selectedItem.thumbnail} 
+                      <img
+                        src={selectedItem.thumbnail}
                         alt={selectedItem.title}
                         className="w-32 h-24 object-cover rounded-lg shadow-sm"
                       />
                       <div>
-                        <h3 className="text-xl font-bold text-gray-900">{selectedItem.title}</h3>
-                        <p className="text-gray-600 mt-1">{selectedItem.category}</p>
-                        <p className="text-sm text-gray-500 mt-2">Submitted: {selectedItem.dateSubmitted}</p>
+                        <h3 className="text-xl font-bold text-gray-900">
+                          {selectedItem.title}
+                        </h3>
+                        <p className="text-gray-600 mt-1">
+                          {selectedItem.category}
+                        </p>
+                        <p className="text-sm text-gray-500 mt-2">
+                          Submitted: {selectedItem.dateSubmitted}
+                        </p>
                       </div>
                     </div>
-                    
+
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">Artist Information</h4>
+                      <h4 className="font-semibold text-gray-900 mb-2">
+                        Artist Information
+                      </h4>
                       <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                        <img 
-                          src={selectedItem.artist.avatar} 
+                        <img
+                          src={selectedItem.artist.avatar}
                           alt={selectedItem.artist.name}
                           className="w-12 h-12 rounded-full object-cover"
                         />
                         <div>
-                          <p className="font-semibold text-gray-900">{selectedItem.artist.name}</p>
-                          <p className="text-sm text-gray-600">{selectedItem.artist.email}</p>
+                          <p className="font-semibold text-gray-900">
+                            {selectedItem.artist.name}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {selectedItem.artist.email}
+                          </p>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">Description</h4>
-                      <p className="text-gray-600 leading-relaxed">{selectedItem.description}</p>
+                      <h4 className="font-semibold text-gray-900 mb-2">
+                        Description
+                      </h4>
+                      <p className="text-gray-600 leading-relaxed">
+                        {selectedItem.description}
+                      </p>
                     </div>
-                    
+
                     <div className="flex gap-4 pt-4">
-                      <button 
-                        onClick={() => handleArtworkAction('approve', selectedItem.id)}
+                      <button
+                        onClick={() =>
+                          handleArtworkAction("approve", selectedItem.id)
+                        }
                         className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium"
                       >
                         <Check className="h-4 w-4" />
                         Approve Artwork
                       </button>
-                      <button 
-                        onClick={() => handleArtworkAction('reject', selectedItem.id)}
+                      <button
+                        onClick={() =>
+                          handleArtworkAction("reject", selectedItem.id)
+                        }
                         className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium"
                       >
                         <X className="h-4 w-4" />
@@ -628,53 +602,79 @@ const DashboardApprovals = () => {
                 ) : (
                   <div className="space-y-6">
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">User Information</h4>
+                      <h4 className="font-semibold text-gray-900 mb-2">
+                        User Information
+                      </h4>
                       <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                        <img 
-                          src={selectedItem.user.avatar} 
+                        <img
+                          src={selectedItem.user.avatar}
                           alt={selectedItem.user.name}
                           className="w-12 h-12 rounded-full object-cover"
                         />
                         <div>
-                          <p className="font-semibold text-gray-900">{selectedItem.user.name}</p>
-                          <p className="text-sm text-gray-600">{selectedItem.user.email}</p>
+                          <p className="font-semibold text-gray-900">
+                            {selectedItem.user.name}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {selectedItem.user.email}
+                          </p>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">Request Details</h4>
+                      <h4 className="font-semibold text-gray-900 mb-2">
+                        Request Details
+                      </h4>
                       <div className="p-4 bg-gray-50 rounded-lg space-y-2">
                         <div className="flex justify-between">
-                          <span className="text-sm text-gray-600">Request Type:</span>
-                          <span className="text-sm font-semibold text-gray-900">{selectedItem.requestType}</span>
+                          <span className="text-sm text-gray-600">
+                            Request Type:
+                          </span>
+                          <span className="text-sm font-semibold text-gray-900">
+                            {selectedItem.requestType}
+                          </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-sm text-gray-600">Date Submitted:</span>
-                          <span className="text-sm font-semibold text-gray-900">{selectedItem.date}</span>
+                          <span className="text-sm text-gray-600">
+                            Date Submitted:
+                          </span>
+                          <span className="text-sm font-semibold text-gray-900">
+                            {selectedItem.date}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm text-gray-600">Status:</span>
-                          <span className="text-sm font-semibold text-gray-900">{selectedItem.status}</span>
+                          <span className="text-sm font-semibold text-gray-900">
+                            {selectedItem.status}
+                          </span>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">Details</h4>
-                      <p className="text-gray-600 leading-relaxed">{selectedItem.details}</p>
+                      <h4 className="font-semibold text-gray-900 mb-2">
+                        Details
+                      </h4>
+                      <p className="text-gray-600 leading-relaxed">
+                        {selectedItem.details}
+                      </p>
                     </div>
-                    
+
                     <div className="flex gap-4 pt-4">
-                      <button 
-                        onClick={() => handleUserAction('approve', selectedItem.id)}
+                      <button
+                        onClick={() =>
+                          handleUserAction("approve", selectedItem.id)
+                        }
                         className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium"
                       >
                         <Check className="h-4 w-4" />
                         Approve Request
                       </button>
-                      <button 
-                        onClick={() => handleUserAction('reject', selectedItem.id)}
+                      <button
+                        onClick={() =>
+                          handleUserAction("reject", selectedItem.id)
+                        }
                         className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium"
                       >
                         <X className="h-4 w-4" />

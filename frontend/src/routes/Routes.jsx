@@ -26,8 +26,6 @@ import DashboardUsers from "../pages/DashboardUsers";
 import ArtistDashboardLayout from "../components/ArtistDashboardLayout";
 import ArtistHome from "../pages/ArtistHome";
 import MyArtworks from "../components/MyArtworks";
-import ArtistEarnings from "../pages/ArtistEarnings";
-import ArtistSettings from "../pages/ArtistSettings";
 
 // Protected Route Components
 import {
@@ -161,8 +159,6 @@ export const ROUTES = {
   ARTIST: {
     DASHBOARD: "/artist-dashboard",
     MY_ARTWORKS: "/artist-dashboard/my-artworks",
-    EARNINGS: "/artist-dashboard/earnings",
-    SETTINGS: "/artist-dashboard/settings",
   },
 
   // Error Routes
@@ -271,14 +267,6 @@ const router = createBrowserRouter([
           {
             path: "my-artworks",
             element: <MyArtworks />,
-          },
-          {
-            path: "earnings",
-            element: <ArtistEarnings />,
-          },
-          {
-            path: "settings",
-            element: <ArtistSettings />,
           },
         ],
       },

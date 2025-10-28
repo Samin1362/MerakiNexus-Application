@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState, memo } from "react";
-import { 
-  Sparkles, 
-  Heart, 
-  TrendingUp, 
+import Loader from "../components/Loader";
+import {
+  Sparkles,
+  Heart,
+  TrendingUp,
   Coins,
   Eye,
   Target,
   Zap,
   ArrowRight,
-  ExternalLink
+  ExternalLink,
 } from "lucide-react";
 
 // Memoized Artwork Card Component
@@ -16,7 +17,7 @@ const ArtworkCard = memo(({ artwork }) => (
   <div className="group relative overflow-hidden rounded-3xl border border-white/15 bg-white/8 backdrop-blur-xl shadow-2xl shadow-indigo-950/25 transform transition-all duration-700 hover:scale-[1.02] hover:shadow-purple-500/25 hover:border-purple-400/40">
     {/* Gradient overlay effect */}
     <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-indigo-500/0 to-purple-500/0 opacity-0 transition-opacity duration-700 group-hover:opacity-15" />
-    
+
     {/* Image container */}
     <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-gray-900 to-black">
       <img
@@ -25,10 +26,10 @@ const ArtworkCard = memo(({ artwork }) => (
         loading="lazy"
         className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110"
       />
-      
+
       {/* Dark overlay on hover */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-      
+
       {/* View Details Button */}
       <div className="absolute inset-x-4 bottom-4 opacity-0 translate-y-6 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0">
         <button className="w-full flex items-center justify-center gap-2 bg-white/95 backdrop-blur-sm text-gray-900 px-4 py-3 rounded-2xl font-semibold hover:bg-white transition-all duration-300 shadow-lg">
@@ -37,12 +38,14 @@ const ArtworkCard = memo(({ artwork }) => (
         </button>
       </div>
     </div>
-    
+
     {/* Card content */}
     <div className="p-6">
-      <h3 className="text-xl font-bold text-white truncate mb-2">{artwork.title}</h3>
+      <h3 className="text-xl font-bold text-white truncate mb-2">
+        {artwork.title}
+      </h3>
       <p className="text-white/75 mb-3">{artwork.artist}</p>
-      
+
       {artwork.classification && (
         <div className="flex items-center gap-3">
           <span className="px-3 py-1 bg-gradient-to-r from-purple-500/25 to-indigo-500/25 text-purple-200 text-sm rounded-full font-medium border border-purple-400/30">
@@ -62,26 +65,26 @@ const ArtworkCard = memo(({ artwork }) => (
 // Feature Card Component
 const FeatureCard = memo(({ feature }) => {
   const IconComponent = feature.icon;
-  
+
   return (
     <div className="group relative overflow-hidden rounded-3xl bg-white/10 backdrop-blur-xl border border-white/15 p-8 shadow-2xl shadow-indigo-950/20 transition-all duration-700 hover:-translate-y-3 hover:bg-white/15 hover:shadow-purple-500/30 hover:border-purple-400/40">
       {/* Animated background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-indigo-500/0 to-purple-500/0 opacity-0 transition-opacity duration-700 group-hover:opacity-15" />
-      
+
       <div className="relative z-10">
         {/* Icon container */}
         <div className="w-18 h-18 rounded-3xl bg-gradient-to-br from-purple-400 via-indigo-500 to-purple-600 flex items-center justify-center mb-6 transform transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-xl">
           <IconComponent className="w-9 h-9 text-white" />
         </div>
-        
+
         <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-purple-100 transition-colors duration-300">
           {feature.title}
         </h3>
-        
+
         <p className="text-white/85 leading-relaxed text-lg">
           {feature.description}
         </p>
-        
+
         {/* Animated bottom accent line */}
         <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r from-purple-500 via-indigo-400 to-purple-500 scale-x-0 origin-left transition-transform duration-700 group-hover:scale-x-100" />
       </div>
@@ -93,12 +96,12 @@ function HomePage() {
   const [artworks, setArtworks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const rootRef = useRef(null);
-  
+
   // Navigation handlers
   const navigateToGallery = () => {
     window.location.href = "/gallery";
   };
-  
+
   const handleLearnMore = () => {
     window.location.href = "/about";
   };
@@ -109,12 +112,12 @@ function HomePage() {
       try {
         const response = await fetch("/art-data.json");
         const data = await response.json();
-        const artworksList = Array.isArray(data) 
-          ? data 
-          : Array.isArray(data?.artworks) 
-          ? data.artworks 
+        const artworksList = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.artworks)
+          ? data.artworks
           : [];
-        
+
         setArtworks(artworksList.slice(0, 4));
       } catch (error) {
         console.error("Failed to load artworks:", error);
@@ -130,22 +133,26 @@ function HomePage() {
   const platformFeatures = [
     {
       title: "AI Art Generation",
-      description: "Create stunning artworks with state-of-the-art AI models and neural networks for unlimited creative possibilities.",
+      description:
+        "Create stunning artworks with state-of-the-art AI models and neural networks for unlimited creative possibilities.",
       icon: Sparkles,
     },
     {
-      title: "Sentiment Analysis", 
-      description: "Deep understanding of emotional resonance across all creative content using advanced machine learning.",
+      title: "Sentiment Analysis",
+      description:
+        "Deep understanding of emotional resonance across all creative content using advanced machine learning.",
       icon: Heart,
     },
     {
       title: "Aesthetic Scoring",
-      description: "Quantify visual appeal using sophisticated algorithms trained on millions of artistic masterpieces.",
+      description:
+        "Quantify visual appeal using sophisticated algorithms trained on millions of artistic masterpieces.",
       icon: TrendingUp,
     },
     {
       title: "Web3 Collectibles",
-      description: "Mint, trade, and showcase blockchain-verified digital assets with full ownership transparency.",
+      description:
+        "Mint, trade, and showcase blockchain-verified digital assets with full ownership transparency.",
       icon: Coins,
     },
   ];
@@ -164,7 +171,6 @@ function HomePage() {
 
       {/* Main content container */}
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-20 sm:px-8 lg:px-12 space-y-24">
-        
         {/* Hero Section */}
         <section className="grid items-center gap-16 lg:grid-cols-2">
           <div className="text-center lg:text-left space-y-10">
@@ -174,14 +180,15 @@ function HomePage() {
                 Welcome
               </span>
             </h1>
-            
+
             {/* Hero description */}
             <p className="text-xl sm:text-2xl lg:text-3xl text-white/90 max-w-3xl mx-auto lg:mx-0 leading-relaxed font-light">
-              <span className="font-bold text-white">MerakiNexus</span> is where AI-driven
-              creativity meets Web3 innovation. Artists showcase their masterpieces while AI
-              evaluates style and value, and blockchain ensures secure, transparent ownership.
+              <span className="font-bold text-white">MerakiNexus</span> is where
+              AI-driven creativity meets Web3 innovation. Artists showcase their
+              masterpieces while AI evaluates style and value, and blockchain
+              ensures secure, transparent ownership.
             </p>
-            
+
             {/* CTA buttons */}
             <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start">
               <button
@@ -190,14 +197,14 @@ function HomePage() {
               >
                 {/* Button shimmer effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] transition-transform duration-1000 group-hover:translate-x-[200%]" />
-                
+
                 <div className="relative flex items-center gap-3 font-bold text-lg">
                   <Sparkles className="w-6 h-6" />
                   Explore Gallery
                   <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-2" />
                 </div>
               </button>
-              
+
               <button
                 onClick={handleLearnMore}
                 className="group rounded-3xl border-2 border-white/30 backdrop-blur-sm px-10 py-5 text-white transition-all duration-500 hover:bg-white/15 hover:scale-105 hover:border-white/50 focus:outline-none focus:ring-4 focus:ring-white/30"
@@ -215,22 +222,26 @@ function HomePage() {
             <div className="group relative overflow-hidden rounded-[2rem] border-2 border-white/25 bg-white/10 backdrop-blur-xl shadow-2xl shadow-indigo-950/40 transition-all duration-700 hover:scale-105 hover:rotate-1 hover:shadow-purple-500/30">
               {/* Animated border glow */}
               <div className="absolute -inset-1 rounded-[2rem] bg-gradient-to-r from-fuchsia-400/25 via-cyan-300/25 to-indigo-400/25 blur-xl opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
-              
+
               <div className="relative">
                 <img
                   src="https://images.unsplash.com/photo-1752649935031-7c35f43b24b0?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nzh8fGNyZWF0aXZlJTIwYXJ0d29ya3xlbnwwfHwwfHx8MA%3D%3D"
                   alt="AI creativity showcase"
                   className="w-full h-96 object-cover rounded-[2rem] transition-transform duration-1000 group-hover:scale-110"
                 />
-                
+
                 {/* Overlay gradient */}
                 <div className="absolute inset-0 bg-gradient-to-t from-purple-900/60 via-transparent to-transparent rounded-[2rem]" />
-                
+
                 {/* Floating info card */}
                 <div className="absolute bottom-8 left-8 right-8 transform transition-all duration-500 group-hover:translate-y-[-4px]">
                   <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl">
-                    <h3 className="text-gray-900 font-bold text-xl">AI-Powered Creativity</h3>
-                    <p className="text-gray-700 mt-2">Where artistic vision meets cutting-edge technology</p>
+                    <h3 className="text-gray-900 font-bold text-xl">
+                      AI-Powered Creativity
+                    </h3>
+                    <p className="text-gray-700 mt-2">
+                      Where artistic vision meets cutting-edge technology
+                    </p>
                   </div>
                 </div>
               </div>
@@ -245,25 +256,29 @@ function HomePage() {
               About MerakiNexus
             </h2>
             <p className="text-xl text-white/80 max-w-4xl mx-auto leading-relaxed">
-              Pioneering the future of digital art through AI innovation and blockchain technology
+              Pioneering the future of digital art through AI innovation and
+              blockchain technology
             </p>
           </div>
-          
+
           <div className="grid lg:grid-cols-2 gap-10">
             {/* Vision Card */}
             <div className="group relative overflow-hidden rounded-[2rem] bg-white/12 backdrop-blur-xl p-10 shadow-2xl shadow-indigo-950/20 border border-white/15 transition-all duration-700 hover:scale-105 hover:bg-white/18 hover:shadow-purple-500/25">
               <div className="absolute top-8 left-8 w-16 h-16 rounded-3xl bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center shadow-xl">
                 <Target className="w-8 h-8 text-white" />
               </div>
-              
+
               <div className="pt-20">
-                <h3 className="text-3xl font-bold mb-6 text-white">Our Vision</h3>
+                <h3 className="text-3xl font-bold mb-6 text-white">
+                  Our Vision
+                </h3>
                 <p className="text-white/90 text-xl leading-relaxed">
-                  Democratize creative expression where AI insight and decentralized ownership 
-                  help every creator find value, recognition, and community in the digital renaissance.
+                  Democratize creative expression where AI insight and
+                  decentralized ownership help every creator find value,
+                  recognition, and community in the digital renaissance.
                 </p>
               </div>
-              
+
               <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-500 via-indigo-400 to-purple-500 scale-x-0 transition-transform duration-700 group-hover:scale-x-100" />
             </div>
 
@@ -272,15 +287,18 @@ function HomePage() {
               <div className="absolute top-8 left-8 w-16 h-16 rounded-3xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center shadow-xl">
                 <Zap className="w-8 h-8 text-white" />
               </div>
-              
+
               <div className="pt-20">
-                <h3 className="text-3xl font-bold mb-6 text-white">Our Mission</h3>
+                <h3 className="text-3xl font-bold mb-6 text-white">
+                  Our Mission
+                </h3>
                 <p className="text-white/90 text-xl leading-relaxed">
-                  Build revolutionary tools that analyze, enhance, and tokenize creative work 
-                  using machine learning and Web3 primitives to reward artistic excellence.
+                  Build revolutionary tools that analyze, enhance, and tokenize
+                  creative work using machine learning and Web3 primitives to
+                  reward artistic excellence.
                 </p>
               </div>
-              
+
               <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-indigo-500 via-purple-400 to-indigo-500 scale-x-0 transition-transform duration-700 group-hover:scale-x-100" />
             </div>
           </div>
@@ -293,28 +311,24 @@ function HomePage() {
               Featured Artworks
             </h2>
             <p className="text-xl text-white/80 max-w-4xl mx-auto leading-relaxed">
-              Discover exceptional pieces from our curated collection of AI-enhanced digital masterpieces
+              Discover exceptional pieces from our curated collection of
+              AI-enhanced digital masterpieces
             </p>
           </div>
-          
+
           {/* Artworks grid */}
-          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
-            {isLoading ? (
-              // Loading skeleton
-              Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="aspect-[4/3] bg-white/10 rounded-3xl mb-4" />
-                  <div className="h-4 bg-white/10 rounded mb-2" />
-                  <div className="h-3 bg-white/10 rounded w-2/3" />
-                </div>
-              ))
-            ) : (
-              artworks.map((artwork) => (
+          {isLoading ? (
+            <div className="relative min-h-[400px]">
+              <Loader text="Loading featured artworks..." />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+              {artworks.map((artwork) => (
                 <ArtworkCard key={artwork.id} artwork={artwork} />
-              ))
-            )}
-          </div>
-          
+              ))}
+            </div>
+          )}
+
           {/* Gallery CTA button */}
           <div className="text-center pt-8">
             <button
@@ -323,7 +337,7 @@ function HomePage() {
             >
               {/* Button shimmer effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent translate-x-[-200%] transition-transform duration-1000 group-hover:translate-x-[200%]" />
-              
+
               <div className="relative flex items-center gap-4">
                 Browse Full Gallery
                 <ArrowRight className="w-6 h-6 transition-transform duration-300 group-hover:translate-x-2" />
@@ -339,13 +353,18 @@ function HomePage() {
               Platform Features
             </h2>
             <p className="text-xl text-white/80 max-w-4xl mx-auto leading-relaxed">
-              Experience the future of digital art with our cutting-edge AI and blockchain technology suite
+              Experience the future of digital art with our cutting-edge AI and
+              blockchain technology suite
             </p>
           </div>
-          
+
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             {platformFeatures.map((feature, index) => (
-              <FeatureCard key={feature.title} feature={feature} index={index} />
+              <FeatureCard
+                key={feature.title}
+                feature={feature}
+                index={index}
+              />
             ))}
           </div>
         </section>

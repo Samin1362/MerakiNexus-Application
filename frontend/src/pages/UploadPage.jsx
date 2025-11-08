@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useNavigate } from "react-router-dom";
 import {
@@ -38,6 +38,7 @@ function UploadPage() {
   const [imagePreview, setImagePreview] = useState("");
   const [imageError, setImageError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -107,16 +108,42 @@ function UploadPage() {
     return () => ctx.revert();
   }, []);
 
-  const onImageUrlChange = (e) => {
-    const url = e.target.value;
-    setImageUrl(url);
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
     setImageError(false);
 
-    // Update preview if URL appears to be valid
-    if (url && (url.startsWith("http") || url.startsWith("https"))) {
-      setImagePreview(url);
-    } else {
-      setImagePreview("");
+    try {
+      const data = new FormData();
+      data.append("file", file);
+      data.append("upload_preset", "meraki_nexus_cloudinary");
+
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/dwlrij3xo/image/upload",
+        {
+          method: "POST",
+          body: data,
+        }
+      );
+
+      const fileData = await res.json();
+
+      if (fileData.secure_url) {
+        setImageUrl(fileData.secure_url);
+        setImagePreview(fileData.secure_url);
+        toast.success("Image uploaded successfully!", 3000);
+      } else {
+        setImageError(true);
+        toast.error("Failed to upload image", 3000);
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      setImageError(true);
+      toast.error("Failed to upload image", 3000);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -152,7 +179,7 @@ function UploadPage() {
       !artValueUsd
     ) {
       alert(
-        "Please fill in all fields including art value, price per unit, and provide an image URL."
+        "Please fill in all fields including art value, price per unit, and provide an image."
       );
       return;
     }
@@ -322,8 +349,7 @@ function UploadPage() {
                     No Image Yet
                   </h3>
                   <p className="text-white/60 max-w-xs">
-                    Enter an image URL in the form to see a preview of your
-                    artwork here.
+                    Upload an image file to see a preview of your artwork here.
                   </p>
                 </div>
               )}
@@ -335,11 +361,10 @@ function UploadPage() {
                 <AlertCircle className="w-5 h-5 text-red-300 flex-shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-semibold text-red-200 mb-1">
-                    Image Load Error
+                    Image Upload Error
                   </h4>
                   <p className="text-red-200/80 text-sm">
-                    Unable to load image from the provided URL. Please check the
-                    URL and try again.
+                    Unable to upload the image. Please try again.
                   </p>
                 </div>
               </div>
@@ -348,7 +373,7 @@ function UploadPage() {
 
           {/* Right Column - Form */}
           <div className="space-y-6">
-            <form ref={formRef} onSubmit={onSubmit} className="space-y-6">
+            <div ref={formRef} className="space-y-6">
               {/* Basic Information Section */}
               <div className="rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-lg border border-white/10 p-6 shadow-xl">
                 <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
@@ -431,22 +456,29 @@ function UploadPage() {
                     </div>
                   </div>
 
-                  {/* Image URL */}
+                  {/* Image Upload */}
                   <div ref={(el) => (fieldsRef.current[4] = el)}>
                     <label className="mb-2 flex items-center gap-2 text-sm font-medium text-white/90">
                       <ImageIcon className="w-4 h-4 text-indigo-400" />
-                      Image URL
+                      Upload Image
                     </label>
-                    <input
-                      type="url"
-                      value={imageUrl}
-                      onChange={onImageUrlChange}
-                      className="w-full rounded-xl border-2 border-white/20 bg-white/5 px-4 py-3 text-white outline-none placeholder-white/40 transition-all duration-300 focus:border-indigo-400 focus:bg-white/10 focus:shadow-lg focus:shadow-indigo-500/20"
-                      placeholder="https://example.com/your-image.jpg"
-                      required
-                    />
+                    <div className="relative">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        disabled={isUploading}
+                        className="w-full rounded-xl border-2 border-white/20 bg-white/5 px-4 py-3 text-white outline-none placeholder-white/40 transition-all duration-300 focus:border-indigo-400 focus:bg-white/10 focus:shadow-lg focus:shadow-indigo-500/20 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-500/20 file:text-purple-200 file:cursor-pointer hover:file:bg-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                        required
+                      />
+                      {isUploading && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                        </div>
+                      )}
+                    </div>
                     <p className="mt-1 text-xs text-white/50">
-                      Direct link to your artwork image
+                      Select an image file to upload
                     </p>
                   </div>
                 </div>
@@ -520,10 +552,10 @@ function UploadPage() {
               {/* Submit Button */}
               <button
                 ref={submitRef}
-                type="submit"
-                disabled={isSubmitting}
+                onClick={onSubmit}
+                disabled={isSubmitting || isUploading}
                 className={`w-full rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 px-8 py-4 text-lg font-bold text-white shadow-2xl transition-all duration-300 flex items-center justify-center gap-2 ${
-                  isSubmitting
+                  isSubmitting || isUploading
                     ? "opacity-70 cursor-not-allowed"
                     : "hover:scale-[1.02] hover:shadow-purple-500/50 active:scale-[0.98]"
                 }`}
@@ -540,7 +572,7 @@ function UploadPage() {
                   </>
                 )}
               </button>
-            </form>
+            </div>
           </div>
         </div>
       </div>

@@ -7,11 +7,10 @@ import {
   User,
   Calendar,
   Palette,
-  Tag,
-  TrendingUp,
   DollarSign,
   Sparkles,
   AlertCircle,
+  Package,
 } from "lucide-react";
 import { getAccessToken } from "../utils/auth";
 import { useAuth } from "../contexts/AuthContext";
@@ -32,9 +31,9 @@ function UploadPage() {
   const [artist, setArtist] = useState("");
   const [year, setYear] = useState("");
   const [medium, setMedium] = useState("");
-  const [tags, setTags] = useState("");
-  const [classificationPercentage, setClassificationPercentage] = useState("");
   const [pricePerUnit, setPricePerUnit] = useState("");
+  const [artValueUsd, setArtValueUsd] = useState("");
+  const [available, setAvailable] = useState("1");
   const [imageUrl, setImageUrl] = useState("");
   const [imagePreview, setImagePreview] = useState("");
   const [imageError, setImageError] = useState(false);
@@ -148,13 +147,12 @@ function UploadPage() {
       !artist ||
       !year ||
       !medium ||
-      !tags ||
       !imageUrl ||
-      !classificationPercentage ||
-      !pricePerUnit
+      !pricePerUnit ||
+      !artValueUsd
     ) {
       alert(
-        "Please fill in all fields including classification percentage, price per unit, and provide an image URL."
+        "Please fill in all fields including art value, price per unit, and provide an image URL."
       );
       return;
     }
@@ -185,24 +183,12 @@ function UploadPage() {
         title,
         artist,
         image_url: imageUrl,
-        classification: "Manual Upload",
-        classification_percentage: parseFloat(classificationPercentage),
-        scores: {
-          aesthetic_score: 0.0,
-          sentiment_score: 0.0,
-          memorability_score: 0.0,
-          art_evaluation_score: 0.0,
-        },
-        art_value_usd: 0,
-        available: 1,
-        price_per_unit: parseFloat(pricePerUnit),
+        art_value_usd: parseFloat(artValueUsd),
         created_year: year,
         medium,
-        tags: tags
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean),
         user: finalUserId,
+        available: parseInt(available),
+        price_per_unit: parseFloat(pricePerUnit),
       };
 
       console.log("📤 Payload being sent:", payload);
@@ -444,37 +430,9 @@ function UploadPage() {
                       </select>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Details Section */}
-              <div className="rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-lg border border-white/10 p-6 shadow-xl">
-                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <Tag className="w-5 h-5 text-pink-400" />
-                  Details & Metadata
-                </h2>
-                <div className="space-y-4">
-                  {/* Tags */}
-                  <div ref={(el) => (fieldsRef.current[4] = el)}>
-                    <label className="mb-2 flex items-center gap-2 text-sm font-medium text-white/90">
-                      <Tag className="w-4 h-4 text-pink-400" />
-                      Tags
-                    </label>
-                    <input
-                      type="text"
-                      value={tags}
-                      onChange={(e) => setTags(e.target.value)}
-                      className="w-full rounded-xl border-2 border-white/20 bg-white/5 px-4 py-3 text-white outline-none placeholder-white/40 transition-all duration-300 focus:border-pink-400 focus:bg-white/10 focus:shadow-lg focus:shadow-pink-500/20"
-                      placeholder="abstract, digital, modern"
-                      required
-                    />
-                    <p className="mt-1 text-xs text-white/50">
-                      Separate tags with commas
-                    </p>
-                  </div>
 
                   {/* Image URL */}
-                  <div ref={(el) => (fieldsRef.current[5] = el)}>
+                  <div ref={(el) => (fieldsRef.current[4] = el)}>
                     <label className="mb-2 flex items-center gap-2 text-sm font-medium text-white/90">
                       <ImageIcon className="w-4 h-4 text-indigo-400" />
                       Image URL
@@ -498,44 +456,61 @@ function UploadPage() {
               <div className="rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-lg border border-white/10 p-6 shadow-xl">
                 <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-emerald-400" />
-                  Pricing & Classification
+                  Pricing & Availability
                 </h2>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {/* Classification Percentage */}
-                  <div ref={(el) => (fieldsRef.current[6] = el)}>
-                    <label className="mb-2 flex items-center gap-2 text-sm font-medium text-white/90">
-                      <TrendingUp className="w-4 h-4 text-purple-400" />
-                      Classification %
-                    </label>
-                    <input
-                      type="number"
-                      value={classificationPercentage}
-                      onChange={(e) =>
-                        setClassificationPercentage(e.target.value)
-                      }
-                      className="w-full rounded-xl border-2 border-white/20 bg-white/5 px-4 py-3 text-white outline-none placeholder-white/40 transition-all duration-300 focus:border-purple-400 focus:bg-white/10 focus:shadow-lg focus:shadow-purple-500/20"
-                      placeholder="85.5"
-                      min="0"
-                      max="100"
-                      step="0.1"
-                      required
-                    />
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {/* Art Value USD */}
+                    <div ref={(el) => (fieldsRef.current[5] = el)}>
+                      <label className="mb-2 flex items-center gap-2 text-sm font-medium text-white/90">
+                        <DollarSign className="w-4 h-4 text-emerald-400" />
+                        Art Value (USD)
+                      </label>
+                      <input
+                        type="number"
+                        value={artValueUsd}
+                        onChange={(e) => setArtValueUsd(e.target.value)}
+                        className="w-full rounded-xl border-2 border-white/20 bg-white/5 px-4 py-3 text-white outline-none placeholder-white/40 transition-all duration-300 focus:border-emerald-400 focus:bg-white/10 focus:shadow-lg focus:shadow-emerald-500/20"
+                        placeholder="1000"
+                        min="0"
+                        step="0.01"
+                        required
+                      />
+                    </div>
+
+                    {/* Price Per Unit */}
+                    <div ref={(el) => (fieldsRef.current[6] = el)}>
+                      <label className="mb-2 flex items-center gap-2 text-sm font-medium text-white/90">
+                        <DollarSign className="w-4 h-4 text-purple-400" />
+                        Price (ETH)
+                      </label>
+                      <input
+                        type="number"
+                        value={pricePerUnit}
+                        onChange={(e) => setPricePerUnit(e.target.value)}
+                        className="w-full rounded-xl border-2 border-white/20 bg-white/5 px-4 py-3 text-white outline-none placeholder-white/40 transition-all duration-300 focus:border-purple-400 focus:bg-white/10 focus:shadow-lg focus:shadow-purple-500/20"
+                        placeholder="0.01"
+                        min="0"
+                        step="0.001"
+                        required
+                      />
+                    </div>
                   </div>
 
-                  {/* Price Per Unit */}
+                  {/* Available */}
                   <div ref={(el) => (fieldsRef.current[7] = el)}>
                     <label className="mb-2 flex items-center gap-2 text-sm font-medium text-white/90">
-                      <DollarSign className="w-4 h-4 text-emerald-400" />
-                      Price (ETH)
+                      <Package className="w-4 h-4 text-indigo-400" />
+                      Available Units
                     </label>
                     <input
                       type="number"
-                      value={pricePerUnit}
-                      onChange={(e) => setPricePerUnit(e.target.value)}
-                      className="w-full rounded-xl border-2 border-white/20 bg-white/5 px-4 py-3 text-white outline-none placeholder-white/40 transition-all duration-300 focus:border-emerald-400 focus:bg-white/10 focus:shadow-lg focus:shadow-emerald-500/20"
-                      placeholder="0.01"
+                      value={available}
+                      onChange={(e) => setAvailable(e.target.value)}
+                      className="w-full rounded-xl border-2 border-white/20 bg-white/5 px-4 py-3 text-white outline-none placeholder-white/40 transition-all duration-300 focus:border-indigo-400 focus:bg-white/10 focus:shadow-lg focus:shadow-indigo-500/20"
+                      placeholder="1"
                       min="0"
-                      step="0.001"
+                      step="1"
                       required
                     />
                   </div>
